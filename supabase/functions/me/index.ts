@@ -1,7 +1,6 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7'
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { getUser } from 'https://esm.sh/@supabase/supabase-js@2.39.7/dist/module/lib/helpers'
 import { z } from 'https://esm.sh/zod@3.22.4'
 
 // Define response schema with Zod
@@ -40,11 +39,30 @@ serve(async (req) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || ''
     
-    // Get user from auth cookie
+    // Extract the JWT token from the Authorization header
     const authHeader = req.headers.get('Authorization') || ''
-    const user = await getUser(authHeader, supabaseAnonKey)
+    const token = authHeader.replace('Bearer ', '')
     
-    if (!user) {
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+    
+    // Create Supabase client
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        headers: {
+          Authorization: authHeader
+        }
+      }
+    })
+    
+    // Get user from the JWT
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+    
+    if (userError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -53,34 +71,20 @@ serve(async (req) => {
     
     // Create Supabase client with service role key for fetching protected data
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    const supabase = createClient(supabaseUrl, supabaseServiceKey)
+    const adminSupabase = createClient(supabaseUrl, supabaseServiceKey)
     
     // Fetch user data from the users table
-    const { data: userData, error: userError } = await supabase
+    const { data: userData, error: userDataError } = await adminSupabase
       .from('users')
-      .select('*, organizations:org_id(id, name)')
+      .select('*, organizations:org_id(*)')
       .eq('user_id', user.id)
       .single()
     
-    if (userError || !userData) {
-      console.error('Error fetching user data:', userError)
+    if (userDataError || !userData) {
+      console.error('Error fetching user data:', userDataError)
       return new Response(JSON.stringify({ 
         error: 'Failed to fetch user data',
-        details: userError?.message 
-      }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
-    
-    // Fetch user email from auth.users
-    const { data: authUserData, error: authUserError } = await supabase.auth.admin.getUserById(user.id)
-    
-    if (authUserError || !authUserData.user) {
-      console.error('Error fetching auth user data:', authUserError)
-      return new Response(JSON.stringify({ 
-        error: 'Failed to fetch auth user data',
-        details: authUserError?.message 
+        details: userDataError?.message 
       }), {
         status: 404,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -90,7 +94,7 @@ serve(async (req) => {
     // Build the response
     const response: UserResponse = {
       user_id: user.id,
-      email: authUserData.user.email || '',
+      email: user.email || '',
       org_id: userData.org_id,
       name: userData.name
     }
