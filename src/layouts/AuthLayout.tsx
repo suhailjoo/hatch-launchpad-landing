@@ -95,7 +95,7 @@ const AppSidebar = ({
   return (
     <Sidebar 
       className="border-r shadow-lg bg-gradient-to-b from-hatch-blue/10 to-hatch-coral/5 backdrop-blur-sm" 
-      collapsible="icon" // Change this to "icon" to keep icons visible when collapsed
+      collapsible="icon" // Keep icons visible when collapsed
     >
       {/* Sidebar header with logo and collapse button */}
       <SidebarHeader className="flex items-center justify-between px-5 py-5 border-b border-hatch-blue/10">
