@@ -1,5 +1,6 @@
 
 import { BadgeCheck, Plus, Search } from "lucide-react";
+import CandidateUploadDialog from "@/components/candidates/CandidateUploadDialog";
 
 const Pipeline = () => {
   return (
@@ -17,10 +18,14 @@ const Pipeline = () => {
             />
           </div>
           
-          <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-hatch-coral to-hatch-blue text-white rounded-lg shadow-md hover:shadow-lg transition-all">
-            <Plus size={18} />
-            <span>Add Candidate</span>
-          </button>
+          <CandidateUploadDialog 
+            trigger={
+              <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-hatch-coral to-hatch-blue text-white rounded-lg shadow-md hover:shadow-lg transition-all">
+                <Plus size={18} />
+                <span>Add Candidate</span>
+              </button>
+            }
+          />
         </div>
       </div>
       
