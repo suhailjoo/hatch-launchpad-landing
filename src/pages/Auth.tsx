@@ -17,31 +17,40 @@ const Auth = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-gradient-to-br from-hatch-blue/80 via-white to-hatch-coral/80 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-gradient-to-br from-hatch-blue/90 via-white to-hatch-coral/90 relative overflow-hidden">
       {/* Enhanced animated background elements */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
-        <div className="absolute -top-20 -left-20 w-96 h-96 bg-hatch-blue/30 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-hatch-coral/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-        <div className="absolute top-40 right-20 w-64 h-64 bg-hatch-yellow/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: "1.5s" }} />
-        <div className="absolute bottom-60 left-40 w-48 h-48 bg-hatch-gold/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: "2s" }} />
-        <div className="absolute inset-0 bg-white/40 backdrop-blur-sm" />
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent opacity-60"></div>
+        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-hatch-blue/40 rounded-full blur-3xl mix-blend-multiply animate-pulse"></div>
+        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] bg-hatch-coral/40 rounded-full blur-3xl mix-blend-multiply animate-pulse" style={{ animationDelay: "1.5s" }}></div>
+        <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-hatch-yellow/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: "0.8s" }}></div>
+        <div className="absolute bottom-1/3 left-1/4 w-80 h-80 bg-hatch-gold/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: "1.2s" }}></div>
+        
+        {/* Symmetrical decorative elements */}
+        <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 backdrop-blur-sm rounded-xl rotate-12 border border-white/20"></div>
+        <div className="absolute top-10 right-10 w-20 h-20 bg-white/10 backdrop-blur-sm rounded-xl -rotate-12 border border-white/20"></div>
+        <div className="absolute bottom-10 left-10 w-20 h-20 bg-white/10 backdrop-blur-sm rounded-xl -rotate-12 border border-white/20"></div>
+        <div className="absolute bottom-10 right-10 w-20 h-20 bg-white/10 backdrop-blur-sm rounded-xl rotate-12 border border-white/20"></div>
+        
+        {/* Glass overlay for better contrast */}
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
       </div>
 
       <div className="w-full max-w-md relative z-10">
         {/* Logo and header section with enhanced animations */}
         <motion.div 
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
           className="mb-8 text-center relative z-10"
         >
           <Link to="/" className="inline-block transition-all hover:scale-105 duration-300">
-            <Logo className="h-10 mx-auto drop-shadow-md" variant="long" />
+            <Logo className="h-12 mx-auto drop-shadow-lg" variant="long" />
           </Link>
           <motion.h1 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.5 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
             className="mt-6 text-3xl font-bold bg-gradient-to-r from-hatch-coral via-hatch-blue to-hatch-coral bg-clip-text text-transparent bg-size-200 animate-gradient"
           >
             Welcome to Hatch
@@ -49,36 +58,36 @@ const Auth = () => {
           <motion.p 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.5, duration: 0.5 }}
-            className="mt-2 text-muted-foreground font-medium"
+            transition={{ delay: 0.5, duration: 0.6 }}
+            className="mt-2 text-gray-700 font-medium"
           >
             AI-powered hiring made simple
           </motion.p>
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
+          transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
           className="relative z-10"
         >
-          <Card className="w-full border border-white/60 bg-white/80 backdrop-blur-xl shadow-xl rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300">
+          <Card className="w-full border border-white/70 bg-white/70 backdrop-blur-xl shadow-2xl rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
             <Tabs
               defaultValue="login"
               value={activeTab}
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="grid grid-cols-2 w-full p-1 bg-muted/50 rounded-lg m-4">
+              <TabsList className="grid grid-cols-2 w-full p-1 bg-muted/40 rounded-xl m-4 shadow-inner">
                 <TabsTrigger 
                   value="signup"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hatch-coral data-[state=active]:to-hatch-coral/80 data-[state=active]:text-white rounded-md transition-all duration-300 shadow-sm"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hatch-coral data-[state=active]:to-hatch-coral/80 data-[state=active]:text-white data-[state=active]:shadow-md rounded-lg py-2.5 transition-all duration-300"
                 >
                   Sign Up
                 </TabsTrigger>
                 <TabsTrigger 
                   value="login"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hatch-blue data-[state=active]:to-hatch-blue/80 data-[state=active]:text-white rounded-md transition-all duration-300 shadow-sm"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hatch-blue data-[state=active]:to-hatch-blue/80 data-[state=active]:text-white data-[state=active]:shadow-md rounded-lg py-2.5 transition-all duration-300"
                 >
                   Log In
                 </TabsTrigger>
@@ -100,10 +109,10 @@ const Auth = () => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
-          className="mt-6 text-center text-sm text-slate-700 font-medium relative z-10"
+          transition={{ duration: 0.6, delay: 0.7 }}
+          className="mt-6 text-center text-sm text-gray-700 font-medium relative z-10"
         >
-          <p>
+          <p className="backdrop-blur-sm py-2 px-4 rounded-full bg-white/30 inline-block shadow-sm border border-white/30">
             By continuing, you agree to Hatch's{" "}
             <Link to="#" className="text-hatch-blue hover:text-hatch-coral transition-colors hover:underline font-semibold">
               Terms of Service
