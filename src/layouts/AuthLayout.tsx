@@ -67,7 +67,7 @@ const AuthLayoutContent = ({ currentPath }: { currentPath: string }) => {
       {/* Adding SidebarRail for better control of collapsed sidebar */}
       <SidebarRail className="z-30" />
       
-      <main className={`flex-1 p-8 overflow-auto animate-fade-in transition-all duration-200 ${state === "collapsed" ? "ml-[70px]" : ""}`}>
+      <main className={`flex-1 p-8 overflow-auto animate-fade-in transition-all duration-300 ${state === "collapsed" ? "ml-[72px]" : ""}`}>
         <div className="max-w-7xl mx-auto">
           <Outlet />
         </div>
@@ -96,11 +96,11 @@ const AppSidebar = ({
 
   return (
     <Sidebar 
-      className="border-r shadow-lg bg-gradient-to-b from-hatch-blue/10 to-hatch-coral/5 backdrop-blur-sm fixed h-full transition-all duration-200" 
+      className="border-r shadow-lg bg-white fixed h-full transition-all duration-300 ease-in-out" 
       collapsible="icon" // Keep icons visible when collapsed
     >
       {/* Sidebar header with logo and collapse button */}
-      <SidebarHeader className={`flex items-center justify-between px-5 py-5 border-b border-hatch-blue/10 ${state === "collapsed" ? "px-3" : ""}`}>
+      <SidebarHeader className={`flex items-center justify-between p-5 border-b ${state === "collapsed" ? "p-3" : ""}`}>
         <div className="flex items-center">
           <Logo variant={state === "collapsed" ? "short" : "long"} className={`text-2xl ${state === "collapsed" ? "mx-auto" : ""}`} />
         </div>
@@ -108,7 +108,7 @@ const AppSidebar = ({
         {/* Collapse button positioned at the right side */}
         <button
           onClick={toggleSidebar}
-          className={`p-1.5 rounded-md hover:bg-hatch-blue/10 text-hatch-blue transition-colors ${state === "collapsed" ? "absolute right-1.5" : ""}`}
+          className={`p-1.5 rounded-md text-gray-500 hover:bg-gray-100 hover:text-hatch-coral transition-colors absolute ${state === "collapsed" ? "right-2" : "right-4"}`}
           aria-label={state === "collapsed" ? "Expand sidebar" : "Collapse sidebar"}
         >
           {state === "collapsed" ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
@@ -116,23 +116,23 @@ const AppSidebar = ({
       </SidebarHeader>
       
       {/* Main sidebar content with menu groups */}
-      <SidebarContent className={`px-3 py-4 ${state === "collapsed" ? "px-2" : ""}`}>
+      <SidebarContent className={`px-4 py-6 ${state === "collapsed" ? "px-2 py-4" : ""}`}>
         <SidebarGroup>
-          <SidebarGroupLabel className={`text-hatch-blue font-medium ml-2 mb-3 ${state === "collapsed" ? "hidden" : ""}`}>
+          <SidebarGroupLabel className={`text-gray-400 text-xs font-medium uppercase tracking-wider ml-2 mb-4 ${state === "collapsed" ? "hidden" : ""}`}>
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem className="mb-2">
+              <SidebarMenuItem className="mb-3">
                 <SidebarMenuButton 
                   asChild 
                   isActive={isActive("/dashboard")}
-                  className={`hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 rounded-xl transition-all duration-200 
-                    data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/15 data-[active=true]:to-hatch-blue/15
+                  className={`hover:bg-gray-50 rounded-lg transition-all duration-200 
+                    data-[active=true]:bg-hatch-coral/10 data-[active=true]:text-hatch-coral
                     ${state === "collapsed" ? "justify-center" : ""}`}
                   tooltip="Dashboard"
                 >
-                  <Link to="/dashboard" className={`flex items-center gap-4 px-4 py-3 ${state === "collapsed" ? "px-2 py-3 gap-0" : ""}`}>
+                  <Link to="/dashboard" className={`flex items-center gap-4 px-4 py-3 ${state === "collapsed" ? "px-0 justify-center" : ""}`}>
                     <div className={`p-2 bg-hatch-coral/10 rounded-lg ${state === "collapsed" ? "mx-auto" : ""}`}>
                       <LayoutDashboard className="text-hatch-coral" size={20} />
                     </div>
@@ -141,16 +141,16 @@ const AppSidebar = ({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               
-              <SidebarMenuItem className="mb-2">
+              <SidebarMenuItem className="mb-3">
                 <SidebarMenuButton 
                   asChild 
                   isActive={isActive("/jobs")}
-                  className={`hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 rounded-xl transition-all duration-200 
-                    data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/15 data-[active=true]:to-hatch-blue/15
+                  className={`hover:bg-gray-50 rounded-lg transition-all duration-200 
+                    data-[active=true]:bg-hatch-blue/10 data-[active=true]:text-hatch-blue
                     ${state === "collapsed" ? "justify-center" : ""}`}
                   tooltip="Jobs"
                 >
-                  <Link to="/jobs" className={`flex items-center gap-4 px-4 py-3 ${state === "collapsed" ? "px-2 py-3 gap-0" : ""}`}>
+                  <Link to="/jobs" className={`flex items-center gap-4 px-4 py-3 ${state === "collapsed" ? "px-0 justify-center" : ""}`}>
                     <div className={`p-2 bg-hatch-blue/10 rounded-lg ${state === "collapsed" ? "mx-auto" : ""}`}>
                       <Briefcase className="text-hatch-blue" size={20} />
                     </div>
@@ -159,16 +159,16 @@ const AppSidebar = ({
                 </SidebarMenuButton>
               </SidebarMenuItem>
               
-              <SidebarMenuItem className="mb-2">
+              <SidebarMenuItem className="mb-3">
                 <SidebarMenuButton 
                   asChild 
                   isActive={isActive("/pipeline")}
-                  className={`hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 rounded-xl transition-all duration-200 
-                    data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/15 data-[active=true]:to-hatch-blue/15
+                  className={`hover:bg-gray-50 rounded-lg transition-all duration-200 
+                    data-[active=true]:bg-hatch-gold/10 data-[active=true]:text-hatch-gold
                     ${state === "collapsed" ? "justify-center" : ""}`}
                   tooltip="Candidates"
                 >
-                  <Link to="/pipeline" className={`flex items-center gap-4 px-4 py-3 ${state === "collapsed" ? "px-2 py-3 gap-0" : ""}`}>
+                  <Link to="/pipeline" className={`flex items-center gap-4 px-4 py-3 ${state === "collapsed" ? "px-0 justify-center" : ""}`}>
                     <div className={`p-2 bg-hatch-gold/10 rounded-lg ${state === "collapsed" ? "mx-auto" : ""}`}>
                       <Users className="text-hatch-gold" size={20} />
                     </div>
@@ -181,12 +181,12 @@ const AppSidebar = ({
                 <SidebarMenuButton 
                   asChild 
                   isActive={isActive("/settings")}
-                  className={`hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 rounded-xl transition-all duration-200 
-                    data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/15 data-[active=true]:to-hatch-blue/15
+                  className={`hover:bg-gray-50 rounded-lg transition-all duration-200 
+                    data-[active=true]:bg-hatch-yellow/10 data-[active=true]:text-hatch-yellow
                     ${state === "collapsed" ? "justify-center" : ""}`}
                   tooltip="Settings"
                 >
-                  <Link to="/settings" className={`flex items-center gap-4 px-4 py-3 ${state === "collapsed" ? "px-2 py-3 gap-0" : ""}`}>
+                  <Link to="/settings" className={`flex items-center gap-4 px-4 py-3 ${state === "collapsed" ? "px-0 justify-center" : ""}`}>
                     <div className={`p-2 bg-hatch-yellow/10 rounded-lg ${state === "collapsed" ? "mx-auto" : ""}`}>
                       <Settings className="text-hatch-yellow" size={20} />
                     </div>
@@ -200,10 +200,10 @@ const AppSidebar = ({
       </SidebarContent>
       
       {/* Sidebar footer with logout button */}
-      <SidebarFooter className={`mt-auto p-4 border-t border-hatch-blue/10 ${state === "collapsed" ? "p-2" : ""}`}>
+      <SidebarFooter className={`mt-auto p-5 border-t ${state === "collapsed" ? "p-3" : ""}`}>
         <button 
           onClick={handleLogout} 
-          className={`flex items-center gap-4 px-4 py-3 w-full rounded-xl text-gray-600 hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 transition-all ${state === "collapsed" ? "px-0 justify-center" : ""}`}
+          className={`flex items-center gap-4 px-4 py-3 w-full rounded-lg text-gray-600 hover:bg-gray-50 transition-all hover:text-gray-900 ${state === "collapsed" ? "px-0 justify-center" : ""}`}
           aria-label="Log out"
           title={state === "collapsed" ? "Log out" : undefined}
         >

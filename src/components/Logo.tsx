@@ -8,11 +8,11 @@ interface LogoProps {
 
 const Logo = ({ variant = "long", className }: LogoProps) => {
   return (
-    <div className={cn("font-roboto font-bold text-hatch-coral", className)}>
+    <div className={cn("font-roboto font-bold text-hatch-coral transition-all duration-300", className)}>
       {variant === "long" ? (
         <span>hatch.</span>
       ) : (
-        <span>h.</span>
+        <span className="text-xl">h.</span>
       )}
     </div>
   );
