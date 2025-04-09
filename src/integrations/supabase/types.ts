@@ -9,6 +9,51 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ai_results: {
+        Row: {
+          candidate_id: string
+          created_at: string | null
+          id: string
+          job_type: string
+          org_id: string
+          result: Json
+          updated_at: string | null
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string | null
+          id?: string
+          job_type: string
+          org_id: string
+          result: Json
+          updated_at?: string | null
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string | null
+          id?: string
+          job_type?: string
+          org_id?: string
+          result?: Json
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_results_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_results_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidates: {
         Row: {
           created_at: string | null
