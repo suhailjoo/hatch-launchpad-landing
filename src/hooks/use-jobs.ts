@@ -47,13 +47,15 @@ export const useJobs = () => {
       return data.jobs || [];
     },
     enabled: !!user,
-    onError: (error) => {
-      console.error("Error fetching jobs:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load jobs. Please try again.",
-        variant: "destructive",
-      });
+    meta: {
+      onError: (error: Error) => {
+        console.error("Error fetching jobs:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load jobs. Please try again.",
+          variant: "destructive",
+        });
+      },
     },
   });
 };

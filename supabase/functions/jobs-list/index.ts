@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.36.0";
+import * as z from "https://esm.sh/zod@3.22.4";
 
 // Define CORS headers
 const corsHeaders = {
@@ -31,6 +32,23 @@ const supabaseClient = (req: Request) => {
     }
   );
 };
+
+// Define the job summary schema using zod
+const JobSummarySchema = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  description: z.string(),
+  department: z.string(),
+  work_type: z.enum(["in_office", "hybrid", "remote"]),
+  salary_currency: z.enum(["USD", "CAD", "EUR", "GBP", "INR", "THB", "VND", "SGD", "AUD"]),
+  salary_budget: z.number(),
+  created_at: z.string(),
+});
+
+// Define the response schema
+const ResponseSchema = z.object({
+  jobs: z.array(JobSummarySchema),
+});
 
 serve(async (req) => {
   // Handle CORS preflight requests
