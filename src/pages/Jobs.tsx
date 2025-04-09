@@ -1,14 +1,18 @@
 
-import { Plus, Briefcase, Building, Clock, DollarSign, Users, ExternalLink, FolderX } from "lucide-react";
+import { Plus, Briefcase, Building, Clock, DollarSign, Users, ExternalLink, FolderX, AlertTriangle, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useJobs } from "@/hooks/use-jobs";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useState } from "react";
+import { toast } from "@/hooks/use-toast";
 
 const Jobs = () => {
-  const { data: jobs, isLoading, error } = useJobs();
+  const { data: jobs, isLoading, error, refetch } = useJobs();
+  const [isRefetching, setIsRefetching] = useState(false);
   
   // Format currency with appropriate symbol
   const formatCurrency = (currency: string, amount: number) => {
@@ -29,6 +33,25 @@ const Jobs = () => {
     };
     
     return workTypeLabels[workType] || workType;
+  };
+  
+  const handleRetry = async () => {
+    try {
+      setIsRefetching(true);
+      await refetch();
+      toast({
+        title: "Refreshed",
+        description: "Job list has been refreshed",
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to refresh. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsRefetching(false);
+    }
   };
   
   const EmptyState = () => (
@@ -71,6 +94,44 @@ const Jobs = () => {
             </li>
           </ul>
         </div>
+      </div>
+    </div>
+  );
+  
+  const ErrorState = () => (
+    <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+      <div className="w-20 h-20 rounded-full bg-red-50 flex items-center justify-center mb-6">
+        <AlertTriangle size={32} className="text-red-500" />
+      </div>
+      <h3 className="text-xl font-semibold text-gray-800 mb-3">Unable to load jobs</h3>
+      <p className="text-gray-500 mb-8 max-w-md">
+        We're having trouble loading your job listings. This might be due to a network issue or session timeout.
+      </p>
+      <div className="space-y-4 w-full max-w-md">
+        <Button 
+          className="w-full flex items-center gap-2 justify-center"
+          onClick={handleRetry}
+          disabled={isRefetching}
+        >
+          {isRefetching ? (
+            <>
+              <RefreshCw size={18} className="animate-spin" />
+              <span>Refreshing...</span>
+            </>
+          ) : (
+            <>
+              <RefreshCw size={18} />
+              <span>Retry</span>
+            </>
+          )}
+        </Button>
+        
+        <Alert className="mt-6 bg-amber-50 border-amber-200">
+          <AlertTitle className="text-amber-800">You might need to log in again</AlertTitle>
+          <AlertDescription className="text-amber-700">
+            If the problem persists, try logging out and logging back in to refresh your session.
+          </AlertDescription>
+        </Alert>
       </div>
     </div>
   );
@@ -124,9 +185,7 @@ const Jobs = () => {
             ))}
           </div>
         ) : error ? (
-          <div className="text-center p-8 text-red-500">
-            <p>Failed to load jobs. Please try again later.</p>
-          </div>
+          <ErrorState />
         ) : jobs && jobs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
             {jobs.map((job) => (

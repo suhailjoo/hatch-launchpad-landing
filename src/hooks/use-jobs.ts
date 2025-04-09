@@ -27,8 +27,11 @@ export const useJobs = () => {
       
       const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !sessionData.session) {
+        console.error("Session error:", sessionError);
         throw new Error("Failed to get authentication session");
       }
+      
+      console.log("Session token available:", !!sessionData.session.access_token);
       
       const response = await fetch("https://jaoxflaynrxgfljlorew.supabase.co/functions/v1/jobs-list", {
         method: "GET",
@@ -40,7 +43,9 @@ export const useJobs = () => {
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to fetch jobs");
+        console.error("Jobs API error:", errorData);
+        const errorMessage = errorData.error || `Failed to fetch jobs (${response.status})`;
+        throw new Error(errorMessage);
       }
       
       const data = await response.json();
