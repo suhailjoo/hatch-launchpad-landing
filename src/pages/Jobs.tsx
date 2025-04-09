@@ -1,9 +1,11 @@
 
-import { Plus, Briefcase, Building, Clock, DollarSign, Users, ExternalLink } from "lucide-react";
+import { Plus, Briefcase, Building, Clock, DollarSign, Users, ExternalLink, FolderX } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { useJobs } from "@/hooks/use-jobs";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
 
 const Jobs = () => {
   const { data: jobs, isLoading, error } = useJobs();
@@ -28,6 +30,50 @@ const Jobs = () => {
     
     return workTypeLabels[workType] || workType;
   };
+  
+  const EmptyState = () => (
+    <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+      <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-6">
+        <FolderX size={32} className="text-gray-400" />
+      </div>
+      <h3 className="text-xl font-semibold text-gray-800 mb-3">No jobs posted yet</h3>
+      <p className="text-gray-500 mb-8 max-w-md">
+        Start building your team by creating your first job posting. It only takes a few minutes to get started.
+      </p>
+      <div className="space-y-4 w-full max-w-md">
+        <Link to="/jobs/create" className="w-full">
+          <Button className="w-full bg-gradient-to-r from-hatch-coral to-hatch-blue text-white hover:from-hatch-coral/90 hover:to-hatch-blue/90 transition-all">
+            <Plus size={18} />
+            <span>Create Your First Job</span>
+          </Button>
+        </Link>
+        <Separator className="my-4" />
+        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+          <h4 className="font-medium text-gray-700 mb-2">Why create a job?</h4>
+          <ul className="text-sm text-gray-600 space-y-2">
+            <li className="flex items-start gap-2">
+              <span className="flex-shrink-0 rounded-full bg-hatch-coral/10 p-1 mt-0.5">
+                <Users size={14} className="text-hatch-coral" />
+              </span>
+              <span>Attract qualified candidates to your open positions</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="flex-shrink-0 rounded-full bg-hatch-blue/10 p-1 mt-0.5">
+                <Building size={14} className="text-hatch-blue" />
+              </span>
+              <span>Showcase your company culture and benefits</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="flex-shrink-0 rounded-full bg-purple-100 p-1 mt-0.5">
+                <Clock size={14} className="text-purple-600" />
+              </span>
+              <span>Speed up your hiring process with our tools</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
   
   return (
     <div className="animate-fade-in">
@@ -62,8 +108,20 @@ const Jobs = () => {
         </div>
         
         {isLoading ? (
-          <div className="flex justify-center items-center p-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-3 border-b-3 border-hatch-coral"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="overflow-hidden">
+                <CardContent className="p-5">
+                  <Skeleton className="h-4 w-1/4 mb-3" />
+                  <Skeleton className="h-6 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-1/2 mb-2" />
+                  <Skeleton className="h-4 w-1/3 mb-2" />
+                </CardContent>
+                <CardFooter className="p-0">
+                  <Skeleton className="h-10 w-full" />
+                </CardFooter>
+              </Card>
+            ))}
           </div>
         ) : error ? (
           <div className="text-center p-8 text-red-500">
@@ -122,21 +180,7 @@ const Jobs = () => {
             </Link>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center p-12 text-center">
-            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-              <Briefcase size={24} className="text-gray-400" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-700 mb-2">No Jobs Found</h3>
-            <p className="text-gray-500 mb-6 max-w-md">
-              You haven't created any jobs yet. Click the button below to create your first job.
-            </p>
-            <Button asChild>
-              <Link to="/jobs/create" className="flex items-center gap-2">
-                <Plus size={16} />
-                <span>Create First Job</span>
-              </Link>
-            </Button>
-          </div>
+          <EmptyState />
         )}
       </div>
     </div>
