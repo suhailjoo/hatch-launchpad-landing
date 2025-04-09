@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
 
 @tailwind base;
@@ -56,9 +55,9 @@
     @apply bg-gradient-to-b from-hatch-coral/90 via-hatch-blue/80 to-hatch-blue/90 backdrop-blur-md;
   }
   
-  /* Updated subtle sidebar gradient */
+  /* Updated subtle sidebar gradient using the provided color palette */
   .sidebar-gradient-subtle {
-    @apply bg-gradient-to-br from-white/95 via-white/90 to-hatch-lightBlue/10 backdrop-blur-lg border-r border-white/20 shadow-lg;
+    @apply bg-gradient-to-b from-[#b9e6ff]/10 via-[#5c95ff]/5 to-[#F97068]/5 backdrop-blur-lg border-r border-white/20 shadow-lg;
   }
   
   /* Glass effect for active menu items */

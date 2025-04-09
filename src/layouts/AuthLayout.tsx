@@ -96,7 +96,7 @@ const AppSidebar = ({
 
   return (
     <Sidebar 
-      className="border-r shadow-xl fixed h-full transition-all duration-300 ease-in-out glass-effect sidebar-gradient-subtle" 
+      className="border-r shadow-xl fixed h-full transition-all duration-300 ease-in-out sidebar-gradient-subtle" 
       collapsible="icon" // Keep icons visible when collapsed
     >
       {/* Sidebar header with logo and collapse button */}
