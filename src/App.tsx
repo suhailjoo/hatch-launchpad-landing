@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Jobs from "./pages/Jobs";
+import JobCreate from "./pages/JobCreate";
 import Pipeline from "./pages/Pipeline";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -34,6 +35,7 @@ const AppContent = () => {
       <Route element={<AuthLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/jobs" element={<Jobs />} />
+        <Route path="/jobs/create" element={<JobCreate />} />
         <Route path="/pipeline" element={<Pipeline />} />
         <Route path="/settings" element={<Settings />} />
       </Route>

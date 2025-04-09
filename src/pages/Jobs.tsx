@@ -1,6 +1,7 @@
 
 import { Plus } from "lucide-react";
 import Logo from "@/components/Logo";
+import { Link } from "react-router-dom";
 
 const Jobs = () => {
   return (
@@ -8,10 +9,10 @@ const Jobs = () => {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold bg-gradient-to-r from-hatch-coral to-hatch-blue bg-clip-text text-transparent">Jobs</h1>
         
-        <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-hatch-coral to-hatch-blue text-white rounded-lg shadow-md hover:shadow-lg transition-all">
+        <Link to="/jobs/create" className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-hatch-coral to-hatch-blue text-white rounded-lg shadow-md hover:shadow-lg transition-all">
           <Plus size={18} />
           <span>New Job</span>
-        </button>
+        </Link>
       </div>
       
       <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
@@ -55,12 +56,12 @@ const Jobs = () => {
           ))}
           
           {/* Empty job card as a placeholder for creating a new job */}
-          <div className="p-5 border border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:bg-gray-50 hover:border-hatch-coral/30 transition-all cursor-pointer min-h-[160px]">
+          <Link to="/jobs/create" className="p-5 border border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:bg-gray-50 hover:border-hatch-coral/30 transition-all cursor-pointer min-h-[160px]">
             <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-2">
               <Plus size={20} className="text-gray-500" />
             </div>
             <span className="text-sm font-medium">Create New Job</span>
-          </div>
+          </Link>
         </div>
       </div>
     </div>
