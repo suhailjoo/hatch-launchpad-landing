@@ -17,14 +17,14 @@ const Auth = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-gradient-to-br from-hatch-blue/5 via-white to-hatch-coral/5 relative overflow-hidden">
-      {/* Animated background elements */}
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-gradient-to-br from-hatch-blue/80 via-white to-hatch-coral/80 relative overflow-hidden">
+      {/* Enhanced animated background elements */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
-        <div className="absolute -top-20 -left-20 w-80 h-80 bg-hatch-lightBlue/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-hatch-coral/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-        <div className="absolute top-40 right-20 w-32 h-32 bg-hatch-yellow/10 rounded-full blur-xl animate-pulse" style={{ animationDelay: "1.5s" }} />
-        <div className="absolute bottom-60 left-40 w-24 h-24 bg-hatch-blue/10 rounded-full blur-xl animate-pulse" style={{ animationDelay: "2s" }} />
-        <div className="absolute inset-0 bg-white/60 backdrop-blur-sm" />
+        <div className="absolute -top-20 -left-20 w-96 h-96 bg-hatch-blue/30 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-20 -right-20 w-96 h-96 bg-hatch-coral/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
+        <div className="absolute top-40 right-20 w-64 h-64 bg-hatch-yellow/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: "1.5s" }} />
+        <div className="absolute bottom-60 left-40 w-48 h-48 bg-hatch-gold/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: "2s" }} />
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-sm" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
@@ -50,7 +50,7 @@ const Auth = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5, duration: 0.5 }}
-            className="mt-2 text-muted-foreground"
+            className="mt-2 text-muted-foreground font-medium"
           >
             AI-powered hiring made simple
           </motion.p>
@@ -62,7 +62,7 @@ const Auth = () => {
           transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
           className="relative z-10"
         >
-          <Card className="w-full border border-white/40 bg-white/80 backdrop-blur-xl shadow-xl rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300">
+          <Card className="w-full border border-white/60 bg-white/80 backdrop-blur-xl shadow-xl rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300">
             <Tabs
               defaultValue="login"
               value={activeTab}
@@ -72,13 +72,13 @@ const Auth = () => {
               <TabsList className="grid grid-cols-2 w-full p-1 bg-muted/50 rounded-lg m-4">
                 <TabsTrigger 
                   value="signup"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hatch-coral/90 data-[state=active]:to-hatch-coral data-[state=active]:text-white rounded-md transition-all duration-300"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hatch-coral data-[state=active]:to-hatch-coral/80 data-[state=active]:text-white rounded-md transition-all duration-300 shadow-sm"
                 >
                   Sign Up
                 </TabsTrigger>
                 <TabsTrigger 
                   value="login"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hatch-blue/90 data-[state=active]:to-hatch-blue data-[state=active]:text-white rounded-md transition-all duration-300"
+                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hatch-blue data-[state=active]:to-hatch-blue/80 data-[state=active]:text-white rounded-md transition-all duration-300 shadow-sm"
                 >
                   Log In
                 </TabsTrigger>
@@ -101,15 +101,15 @@ const Auth = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.6 }}
-          className="mt-6 text-center text-sm text-muted-foreground relative z-10"
+          className="mt-6 text-center text-sm text-slate-700 font-medium relative z-10"
         >
           <p>
             By continuing, you agree to Hatch's{" "}
-            <Link to="#" className="text-hatch-blue hover:text-hatch-coral transition-colors hover:underline">
+            <Link to="#" className="text-hatch-blue hover:text-hatch-coral transition-colors hover:underline font-semibold">
               Terms of Service
             </Link>
             {" "}and{" "}
-            <Link to="#" className="text-hatch-blue hover:text-hatch-coral transition-colors hover:underline">
+            <Link to="#" className="text-hatch-blue hover:text-hatch-coral transition-colors hover:underline font-semibold">
               Privacy Policy
             </Link>.
           </p>

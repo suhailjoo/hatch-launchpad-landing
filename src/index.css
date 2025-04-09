@@ -90,7 +90,7 @@
   }
 
   .animate-gradient {
-    animation: gradientPosition 3s ease infinite alternate;
+    animation: gradientPosition 4s ease infinite alternate;
   }
 
   @keyframes gradientPosition {
@@ -152,5 +152,30 @@
   /* Glass effect */
   .glass {
     @apply bg-white/40 backdrop-blur-md border border-white/20 shadow-lg;
+  }
+  
+  /* Auth page specific animations */
+  .auth-card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:translate-y-[-2px];
+  }
+  
+  .input-focus-effect {
+    @apply transition-all duration-300 focus:ring-4 focus:ring-hatch-blue/20 focus:border-hatch-blue;
+  }
+  
+  .float-animation {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-15px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
   }
 }
