@@ -8,7 +8,8 @@ import {
   DialogHeader, 
   DialogTitle, 
   DialogFooter,
-  DialogTrigger
+  DialogTrigger,
+  DialogDescription
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,6 +68,16 @@ const CandidateUploadDialog: React.FC<CandidateUploadDialogProps> = ({
       });
       return;
     }
+    
+    // Validate job ID before proceeding
+    if (!jobId) {
+      toast({
+        title: "Job ID Missing",
+        description: "Please select a specific job before uploading candidates",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setIsLoading(true);
     setUploadProgress(0);
@@ -91,14 +102,9 @@ const CandidateUploadDialog: React.FC<CandidateUploadDialogProps> = ({
       }
       
       const orgId = userData.org_id;
-      const currentJobId = jobId || ''; // Use provided jobId or empty string for now
       
       if (!orgId) {
         throw new Error("User has no organization");
-      }
-      
-      if (!currentJobId) {
-        throw new Error("No job ID provided");
       }
       
       // Start uploading files one by one
@@ -135,7 +141,7 @@ const CandidateUploadDialog: React.FC<CandidateUploadDialogProps> = ({
         const candidateData: CandidateInsert = {
           email: email || undefined,
           resume_url: publicUrl,
-          job_id: currentJobId,
+          job_id: jobId,
           org_id: orgId,
           status: 'pending'
         };
@@ -177,7 +183,7 @@ const CandidateUploadDialog: React.FC<CandidateUploadDialogProps> = ({
           job_type: 'parse_resume',
           candidate_id: candidate.id,
           org_id: orgId,
-          job_id: currentJobId,
+          job_id: jobId,
           status: 'pending'
         };
         
@@ -250,18 +256,31 @@ const CandidateUploadDialog: React.FC<CandidateUploadDialogProps> = ({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">Upload Candidate Résumés</DialogTitle>
+          <DialogDescription>
+            {!jobId ? "Please select a job before uploading candidates" : "Upload résumés for this job position"}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          {!jobId && (
+            <div className="bg-red-50 text-red-800 p-4 rounded-md flex items-start gap-2">
+              <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="font-medium">No job selected</p>
+                <p className="text-sm">Please navigate to a specific job's pipeline before uploading candidates</p>
+              </div>
+            </div>
+          )}
+
           <div 
             {...getRootProps()} 
             className={`border-2 border-dashed rounded-lg p-6 cursor-pointer transition-colors text-center ${
               isDragActive 
                 ? 'border-hatch-blue bg-hatch-blue/5' 
                 : 'border-gray-200 hover:border-hatch-blue/50 hover:bg-gray-50'
-            }`}
+            } ${!jobId ? 'opacity-50 pointer-events-none' : ''}`}
           >
-            <input {...getInputProps()} />
+            <input {...getInputProps()} disabled={!jobId} />
             <div className="flex flex-col items-center gap-2">
               <div className="w-12 h-12 rounded-full bg-hatch-blue/10 flex items-center justify-center">
                 <Upload className="text-hatch-blue" size={24} />
@@ -280,6 +299,7 @@ const CandidateUploadDialog: React.FC<CandidateUploadDialogProps> = ({
                 type="button" 
                 onClick={e => e.stopPropagation()} 
                 className="mt-2"
+                disabled={!jobId}
               >
                 Browse Files
               </Button>
@@ -318,7 +338,7 @@ const CandidateUploadDialog: React.FC<CandidateUploadDialogProps> = ({
               placeholder="candidate@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
+              disabled={isLoading || !jobId}
             />
           </div>
 
@@ -346,7 +366,7 @@ const CandidateUploadDialog: React.FC<CandidateUploadDialogProps> = ({
             type="button" 
             className="bg-gradient-to-r from-hatch-coral to-hatch-blue text-white"
             onClick={handleUpload}
-            disabled={files.length === 0 || isLoading}
+            disabled={files.length === 0 || isLoading || !jobId}
           >
             {isLoading ? (
               <span className="flex items-center gap-2">

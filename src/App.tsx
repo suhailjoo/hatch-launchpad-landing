@@ -37,6 +37,8 @@ const AppContent = () => {
         <Route path="/jobs" element={<Jobs />} />
         <Route path="/jobs/create" element={<JobCreate />} />
         <Route path="/pipeline" element={<Pipeline />} />
+        {/* Add job-specific pipeline route */}
+        <Route path="/jobs/:jobId/pipeline" element={<Pipeline />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
       
