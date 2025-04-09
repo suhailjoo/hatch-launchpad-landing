@@ -96,6 +96,7 @@ serve(async (req) => {
     const parsedInput = JobCreateInput.safeParse(requestBody);
     
     if (!parsedInput.success) {
+      console.error("Validation error:", parsedInput.error.format());
       return new Response(
         JSON.stringify({ error: 'Invalid request data', details: parsedInput.error.format() }),
         { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
@@ -112,6 +113,7 @@ serve(async (req) => {
       .single();
     
     if (userError || !userData) {
+      console.error("User data error:", userError);
       return new Response(
         JSON.stringify({ error: 'Failed to retrieve user organization data' }),
         { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
@@ -137,6 +139,7 @@ serve(async (req) => {
       .single();
     
     if (jobError || !insertedJob) {
+      console.error("Job insert error:", jobError);
       return new Response(
         JSON.stringify({ error: 'Failed to create job', details: jobError }),
         { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
