@@ -1,8 +1,22 @@
 
 import { BadgeCheck, Plus, Search } from "lucide-react";
 import CandidateUploadDialog from "@/components/candidates/CandidateUploadDialog";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Pipeline = () => {
+  // We're adding state to store the job ID from the URL
+  const [jobId, setJobId] = useState<string | undefined>(undefined);
+  
+  useEffect(() => {
+    // Extract job ID from URL if present
+    const path = window.location.pathname;
+    const match = path.match(/\/jobs\/([^\/]+)\/pipeline/);
+    if (match && match[1]) {
+      setJobId(match[1]);
+    }
+  }, []);
+
   return (
     <div className="animate-fade-in">
       <div className="flex items-center justify-between mb-6">
@@ -19,6 +33,7 @@ const Pipeline = () => {
           </div>
           
           <CandidateUploadDialog 
+            jobId={jobId}
             trigger={
               <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-hatch-coral to-hatch-blue text-white rounded-lg shadow-md hover:shadow-lg transition-all">
                 <Plus size={18} />
