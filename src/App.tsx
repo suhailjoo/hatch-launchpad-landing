@@ -8,8 +8,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
+import Jobs from "./pages/Jobs";
+import Pipeline from "./pages/Pipeline";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import { useAuthStore } from "@/store/authStore";
+import AuthLayout from "./layouts/AuthLayout";
 
 const queryClient = new QueryClient();
 
@@ -25,7 +29,15 @@ const AppContent = () => {
     <Routes>
       <Route path="/" element={<Index />} />
       <Route path="/auth" element={<Auth />} />
-      <Route path="/dashboard" element={<Dashboard />} />
+      
+      {/* Protected routes wrapped in AuthLayout */}
+      <Route element={<AuthLayout />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/jobs" element={<Jobs />} />
+        <Route path="/pipeline" element={<Pipeline />} />
+        <Route path="/settings" element={<Settings />} />
+      </Route>
+      
       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
       <Route path="*" element={<NotFound />} />
     </Routes>
