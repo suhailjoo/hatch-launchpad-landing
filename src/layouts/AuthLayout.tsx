@@ -18,15 +18,14 @@ import {
   useSidebar,
   SidebarRail
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Briefcase, Users, Settings, LogOut, ChevronRight, ChevronLeft, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { LayoutDashboard, Briefcase, Users, Settings, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import Logo from "@/components/Logo";
-import { supabase } from "@/integrations/supabase/client";
 
+// Main AuthLayout component that handles authentication logic
 const AuthLayout = () => {
   const { user, isInitialized } = useAuthStore();
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { state } = useSidebar();
 
   useEffect(() => {
     // Redirect to login if user is not authenticated and initialization is complete
@@ -49,21 +48,29 @@ const AuthLayout = () => {
     return null;
   }
 
+  // Wrap the layout in SidebarProvider to make useSidebar hook available
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-gradient-to-br from-gray-50 to-hatch-lightBlue/10">
-        <AppSidebar currentPath={pathname} />
-        
-        {/* Adding SidebarRail for better control of collapsed sidebar */}
-        <SidebarRail className="z-30" />
-        
-        <main className="flex-1 p-8 overflow-auto animate-fade-in">
-          <div className="max-w-7xl mx-auto">
-            <Outlet />
-          </div>
-        </main>
-      </div>
+      <AuthLayoutContent currentPath={pathname} />
     </SidebarProvider>
+  );
+};
+
+// Separate component for the layout content to use useSidebar hook safely
+const AuthLayoutContent = ({ currentPath }: { currentPath: string }) => {
+  return (
+    <div className="flex min-h-screen w-full bg-gradient-to-br from-gray-50 to-hatch-lightBlue/10">
+      <AppSidebar currentPath={currentPath} />
+      
+      {/* Adding SidebarRail for better control of collapsed sidebar */}
+      <SidebarRail className="z-30" />
+      
+      <main className="flex-1 p-8 overflow-auto animate-fade-in">
+        <div className="max-w-7xl mx-auto">
+          <Outlet />
+        </div>
+      </main>
+    </div>
   );
 };
 
