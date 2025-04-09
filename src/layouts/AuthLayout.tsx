@@ -14,7 +14,8 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarFooter,
-  SidebarTrigger
+  SidebarTrigger,
+  useSidebar
 } from "@/components/ui/sidebar";
 import { LayoutDashboard, Briefcase, Users, Settings, LogOut, ChevronRight, ChevronLeft } from "lucide-react";
 import Logo from "@/components/Logo";
@@ -77,6 +78,7 @@ const AppSidebar = ({
 }) => {
   const navigate = useNavigate();
   const { logout } = useAuthStore();
+  const { state } = useSidebar(); // Get the state from useSidebar
   
   const handleLogout = async () => {
     await logout();
@@ -90,14 +92,15 @@ const AppSidebar = ({
     <Sidebar className="border-r shadow-lg bg-gradient-to-b from-hatch-blue/10 to-hatch-coral/5 backdrop-blur-sm">
       <SidebarHeader className="flex items-center justify-between px-6 py-4 border-b border-hatch-blue/10">
         <div className="flex items-center">
-          <Logo variant={sidebarCollapsed ? "short" : "long"} className="text-2xl" />
+          {/* Use the correct Logo variant based on sidebar state */}
+          <Logo variant={state === "collapsed" ? "short" : "long"} className="text-2xl" />
         </div>
-        <button 
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)} 
+        <SidebarTrigger 
+          onClick={() => setSidebarCollapsed(state === "expanded")}
           className="p-1.5 rounded-md hover:bg-hatch-blue/10 text-hatch-blue transition-colors"
         >
-          {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-        </button>
+          {state === "collapsed" ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </SidebarTrigger>
       </SidebarHeader>
       
       <SidebarContent className="px-3">
@@ -112,6 +115,7 @@ const AppSidebar = ({
                   asChild 
                   isActive={isActive("/dashboard")}
                   className="hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 rounded-xl my-1 transition-all duration-200 data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/15 data-[active=true]:to-hatch-blue/15"
+                  tooltip="Dashboard"
                 >
                   <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2.5">
                     <div className="p-1.5 bg-hatch-coral/10 rounded-lg">
@@ -127,6 +131,7 @@ const AppSidebar = ({
                   asChild 
                   isActive={isActive("/jobs")}
                   className="hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 rounded-xl my-1 transition-all duration-200 data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/15 data-[active=true]:to-hatch-blue/15"
+                  tooltip="Jobs"
                 >
                   <Link to="/jobs" className="flex items-center gap-3 px-3 py-2.5">
                     <div className="p-1.5 bg-hatch-blue/10 rounded-lg">
@@ -142,6 +147,7 @@ const AppSidebar = ({
                   asChild 
                   isActive={isActive("/pipeline")}
                   className="hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 rounded-xl my-1 transition-all duration-200 data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/15 data-[active=true]:to-hatch-blue/15"
+                  tooltip="Candidates"
                 >
                   <Link to="/pipeline" className="flex items-center gap-3 px-3 py-2.5">
                     <div className="p-1.5 bg-hatch-gold/10 rounded-lg">
@@ -157,6 +163,7 @@ const AppSidebar = ({
                   asChild 
                   isActive={isActive("/settings")}
                   className="hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 rounded-xl my-1 transition-all duration-200 data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/15 data-[active=true]:to-hatch-blue/15"
+                  tooltip="Settings"
                 >
                   <Link to="/settings" className="flex items-center gap-3 px-3 py-2.5">
                     <div className="p-1.5 bg-hatch-yellow/10 rounded-lg">
@@ -175,6 +182,7 @@ const AppSidebar = ({
         <button 
           onClick={handleLogout} 
           className="flex items-center gap-2 px-3 py-2.5 w-full rounded-xl text-gray-600 hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 transition-all"
+          aria-label="Log out"
         >
           <div className="p-1.5 bg-gray-100 rounded-lg">
             <LogOut size={18} className="text-gray-500" />
