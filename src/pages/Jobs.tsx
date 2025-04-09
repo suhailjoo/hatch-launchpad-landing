@@ -21,6 +21,7 @@ const Jobs = () => {
       THB: "฿", VND: "₫", SGD: "S$", AUD: "A$"
     };
     
+    // Return formatted currency with single symbol
     return `${currencySymbols[currency] || currency}${amount.toLocaleString()}`;
   };
   
