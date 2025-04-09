@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SignUpForm from "@/components/auth/SignUpForm";
 import LoginForm from "@/components/auth/LoginForm";
-import { Logo } from "@/components/Logo";
+import Logo from "@/components/Logo";
 import { Link } from "react-router-dom";
 
 const Auth = () => {
@@ -15,7 +15,7 @@ const Auth = () => {
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <Link to="/" className="inline-block">
-            <Logo className="h-8 mx-auto" />
+            <Logo className="h-8 mx-auto" variant="long" />
           </Link>
           <h1 className="mt-6 text-2xl font-bold">Welcome to Hatch</h1>
           <p className="mt-2 text-muted-foreground">AI-powered hiring made simple</p>
