@@ -78,7 +78,7 @@ const JobCreateForm = () => {
         min: 0,
         max: 5
       },
-      required_skills: "", // This is a string in the form but will be transformed to string[] by Zod on submission
+      required_skills: "", // This is a string in the form that will be transformed to string[] by Zod
     },
   });
 
