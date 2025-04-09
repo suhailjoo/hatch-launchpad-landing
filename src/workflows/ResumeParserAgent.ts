@@ -152,7 +152,9 @@ export class ResumeParserAgent {
    */
   private async storeResult(parsedResume: ParsedResume): Promise<boolean> {
     try {
-      const { data, error } = await supabase
+      // Type assertion to work around the type issue
+      // This is necessary because the Supabase client's type definition doesn't know about ai_results yet
+      const { data, error } = await (supabase as any)
         .from('ai_results')
         .insert({
           job_type: "resume_parse",

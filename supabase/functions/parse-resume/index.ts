@@ -102,7 +102,8 @@ serve(async (req: Request) => {
     
     // 3. Store the result in the ai_results table
     console.log("Storing parsed resume result...");
-    const { data: aiResultData, error: aiResultError } = await supabase
+    // Type assertion to work around the type issue
+    const { data: aiResultData, error: aiResultError } = await (supabase as any)
       .from('ai_results')
       .insert({
         job_type: "resume_parse",
