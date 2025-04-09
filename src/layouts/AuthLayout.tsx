@@ -1,6 +1,6 @@
 
-import { useEffect } from "react";
-import { Outlet, useNavigate, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
 import { 
   Sidebar, 
@@ -13,13 +13,18 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarFooter
+  SidebarFooter,
+  SidebarTrigger
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Briefcase, Users, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Briefcase, Users, Settings, LogOut, ChevronRight, ChevronLeft } from "lucide-react";
+import Logo from "@/components/Logo";
+import { supabase } from "@/integrations/supabase/client";
 
 const AuthLayout = () => {
   const { user, isInitialized } = useAuthStore();
   const navigate = useNavigate();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { pathname } = useLocation();
 
   useEffect(() => {
     // Redirect to login if user is not authenticated and initialization is complete
@@ -43,9 +48,13 @@ const AuthLayout = () => {
   }
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={!sidebarCollapsed}>
       <div className="flex min-h-screen w-full bg-gradient-to-br from-gray-50 to-hatch-lightBlue/10">
-        <AppSidebar />
+        <AppSidebar 
+          sidebarCollapsed={sidebarCollapsed}
+          setSidebarCollapsed={setSidebarCollapsed}
+          currentPath={pathname}
+        />
         <main className="flex-1 p-8 overflow-auto animate-fade-in">
           <div className="max-w-7xl mx-auto">
             <Outlet />
@@ -57,7 +66,15 @@ const AuthLayout = () => {
 };
 
 // Separate sidebar component for better organization
-const AppSidebar = () => {
+const AppSidebar = ({ 
+  sidebarCollapsed, 
+  setSidebarCollapsed,
+  currentPath
+}: { 
+  sidebarCollapsed: boolean; 
+  setSidebarCollapsed: (collapsed: boolean) => void;
+  currentPath: string;
+}) => {
   const navigate = useNavigate();
   const { logout } = useAuthStore();
   
@@ -66,16 +83,21 @@ const AppSidebar = () => {
     navigate("/auth");
   };
 
+  // Determine active state based on current path
+  const isActive = (path: string) => currentPath.startsWith(path);
+
   return (
-    <Sidebar className="border-r border-hatch-blue/10 shadow-lg glass-card">
-      <SidebarHeader className="flex items-center px-6 py-4">
-        <div className="bg-gradient-to-r from-hatch-coral to-hatch-blue p-0.5 rounded-lg shadow-md">
-          <div className="bg-white rounded-md px-3 py-1">
-            <h2 className="text-xl font-bold bg-gradient-to-r from-hatch-coral to-hatch-blue bg-clip-text text-transparent">
-              Hatch
-            </h2>
-          </div>
+    <Sidebar className="border-r shadow-lg bg-gradient-to-b from-hatch-blue/10 to-hatch-coral/5 backdrop-blur-sm">
+      <SidebarHeader className="flex items-center justify-between px-6 py-4 border-b border-hatch-blue/10">
+        <div className="flex items-center">
+          <Logo variant={sidebarCollapsed ? "short" : "long"} className="text-2xl" />
         </div>
+        <button 
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)} 
+          className="p-1.5 rounded-md hover:bg-hatch-blue/10 text-hatch-blue transition-colors"
+        >
+          {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </button>
       </SidebarHeader>
       
       <SidebarContent className="px-3">
@@ -88,7 +110,8 @@ const AppSidebar = () => {
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   asChild 
-                  className="hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 rounded-xl my-1 transition-all duration-200 data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/10 data-[active=true]:to-hatch-blue/10"
+                  isActive={isActive("/dashboard")}
+                  className="hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 rounded-xl my-1 transition-all duration-200 data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/15 data-[active=true]:to-hatch-blue/15"
                 >
                   <Link to="/dashboard" className="flex items-center gap-3 px-3 py-2.5">
                     <div className="p-1.5 bg-hatch-coral/10 rounded-lg">
@@ -102,7 +125,8 @@ const AppSidebar = () => {
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   asChild 
-                  className="hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 rounded-xl my-1 transition-all duration-200 data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/10 data-[active=true]:to-hatch-blue/10"
+                  isActive={isActive("/jobs")}
+                  className="hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 rounded-xl my-1 transition-all duration-200 data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/15 data-[active=true]:to-hatch-blue/15"
                 >
                   <Link to="/jobs" className="flex items-center gap-3 px-3 py-2.5">
                     <div className="p-1.5 bg-hatch-blue/10 rounded-lg">
@@ -116,7 +140,8 @@ const AppSidebar = () => {
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   asChild 
-                  className="hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 rounded-xl my-1 transition-all duration-200 data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/10 data-[active=true]:to-hatch-blue/10"
+                  isActive={isActive("/pipeline")}
+                  className="hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 rounded-xl my-1 transition-all duration-200 data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/15 data-[active=true]:to-hatch-blue/15"
                 >
                   <Link to="/pipeline" className="flex items-center gap-3 px-3 py-2.5">
                     <div className="p-1.5 bg-hatch-gold/10 rounded-lg">
@@ -130,7 +155,8 @@ const AppSidebar = () => {
               <SidebarMenuItem>
                 <SidebarMenuButton 
                   asChild 
-                  className="hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 rounded-xl my-1 transition-all duration-200 data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/10 data-[active=true]:to-hatch-blue/10"
+                  isActive={isActive("/settings")}
+                  className="hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 rounded-xl my-1 transition-all duration-200 data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/15 data-[active=true]:to-hatch-blue/15"
                 >
                   <Link to="/settings" className="flex items-center gap-3 px-3 py-2.5">
                     <div className="p-1.5 bg-hatch-yellow/10 rounded-lg">
@@ -145,12 +171,14 @@ const AppSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="mt-auto p-4">
+      <SidebarFooter className="mt-auto p-4 border-t border-hatch-blue/10">
         <button 
           onClick={handleLogout} 
-          className="flex items-center gap-2 text-gray-500 hover:text-gray-700 transition-colors w-full px-3 py-2.5 hover:bg-gray-100 rounded-xl"
+          className="flex items-center gap-2 px-3 py-2.5 w-full rounded-xl text-gray-600 hover:bg-gradient-to-r hover:from-hatch-coral/5 hover:to-hatch-blue/5 transition-all"
         >
-          <LogOut size={18} />
+          <div className="p-1.5 bg-gray-100 rounded-lg">
+            <LogOut size={18} className="text-gray-500" />
+          </div>
           <span className="font-medium">Log out</span>
         </button>
       </SidebarFooter>
