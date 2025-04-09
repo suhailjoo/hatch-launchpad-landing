@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -21,7 +22,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Briefcase, FileText, Building, Home, Computer, DollarSign } from "lucide-react";
+import { Briefcase, FileText, Building, Home, Computer, DollarSign, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
 
 // Define the form schema with Zod
 const JobFormSchema = z.object({
@@ -41,6 +45,9 @@ const JobFormSchema = z.object({
 type JobFormValues = z.infer<typeof JobFormSchema>;
 
 const JobCreateForm = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+  
   // Initialize form with default values
   const form = useForm<JobFormValues>({
     resolver: zodResolver(JobFormSchema),
@@ -54,9 +61,53 @@ const JobCreateForm = () => {
     },
   });
 
-  // Form submission handler (UI only)
-  const onSubmit = (values: JobFormValues) => {
-    console.log(values);
+  // Form submission handler
+  const onSubmit = async (values: JobFormValues) => {
+    setIsSubmitting(true);
+    
+    try {
+      // Get current session and access token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          title: "Authentication error",
+          description: "You must be logged in to create a job",
+          variant: "destructive",
+        });
+        navigate("/auth");
+        return;
+      }
+      
+      // Call the Supabase Edge Function to create the job
+      const response = await supabase.functions.invoke("create-job", {
+        body: values,
+      });
+      
+      if (response.error) {
+        throw new Error(response.error.message || "Failed to create job");
+      }
+      
+      // Success toast and redirect to jobs page
+      toast({
+        title: "Job created successfully",
+        description: "Your job posting has been created",
+      });
+      
+      // Redirect to jobs page
+      navigate("/jobs");
+      
+    } catch (error) {
+      console.error("Error creating job:", error);
+      
+      toast({
+        title: "Error creating job",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -245,8 +296,15 @@ const JobCreateForm = () => {
         </div>
 
         <div className="pt-2">
-          <Button type="submit" className="w-full sm:w-auto">
-            Create Job
+          <Button type="submit" className="w-full sm:w-auto" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              "Create Job"
+            )}
           </Button>
         </div>
       </form>

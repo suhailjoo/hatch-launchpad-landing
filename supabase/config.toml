@@ -6,3 +6,6 @@ verify_jwt = false
 
 [functions.me]
 verify_jwt = true
+
+[functions.create-job]
+verify_jwt = true
