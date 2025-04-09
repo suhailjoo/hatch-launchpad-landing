@@ -64,23 +64,29 @@ serve(async (req: Request) => {
     console.log(`Processing resume for candidate ${candidate_id} from ${resume_url}`);
     
     // 1. Download the PDF
+    console.log("Downloading PDF from:", resume_url);
     const pdfResponse = await fetch(resume_url);
     if (!pdfResponse.ok) {
       throw new Error(`Failed to download PDF: ${pdfResponse.status} ${pdfResponse.statusText}`);
     }
     
     const pdfBlob = await pdfResponse.blob();
+    const pdfSize = pdfBlob.size;
+    console.log(`PDF downloaded successfully. Size: ${pdfSize} bytes`);
     
-    // This would be a real PDF text extraction in production
-    // For simplicity, we'll use a mock extraction in this example
+    // For real PDF text extraction, you would use a library like pdf.js
+    // For this example, we'll use extracted text from the PDF
+    // In a production environment, you would implement proper PDF text extraction
     console.log("Extracting text from PDF...");
     
-    // In a real implementation, you would extract the text from the PDF using a PDF parser
-    // For this example, we'll just use a placeholder
+    // In this demo version, we're using a mock extraction
+    // In a production scenario, you would extract the text from the PDF using a PDF parser
     const extractedText = "Jane Doe\nEmail: jane.doe@example.com\nPhone: 555-123-4567\nLocation: San Francisco, CA\n\nExperience:\nSoftware Engineer at Tech Corp (2020-01 to 2023-03)\nSoftware Engineering Intern at Startup Inc (2019-05 to 2019-08)\n\nProjects: Personal Portfolio, Task Management App\n\nCertifications: AWS Certified Developer\n\nAwards: Dean's List 2018-2019\n\nInterests: Hiking, Photography\n\nLinks: https://github.com/janedoe, https://linkedin.com/in/janedoe";
     
+    console.log("Extracted text sample:", extractedText.substring(0, 100) + "...");
+    
     // 2. Call Azure OpenAI to parse the resume
-    console.log("Parsing resume with Azure OpenAI...");
+    console.log(`Calling Azure OpenAI (${azureOpenAIDeploymentId}) to parse resume...`);
     
     // Construct the Azure OpenAI API URL
     const azureOpenAIUrl = `${azureOpenAIEndpoint}/openai/deployments/${azureOpenAIDeploymentId}/chat/completions?api-version=2023-05-15`;
@@ -127,24 +133,30 @@ serve(async (req: Request) => {
           { role: 'system', content: systemMessage },
           { role: 'user', content: extractedText }
         ],
-        temperature: 0.2, // Lower temperature for more deterministic outputs
-        max_tokens: 800,
+        temperature: 0.1, // Lower temperature for more deterministic outputs
+        max_tokens: 1000,
+        model: "gpt-4o-mini", // Explicitly set the model
       }),
     });
     
     if (!openAIResponse.ok) {
       const errorText = await openAIResponse.text();
+      console.error("Azure OpenAI API Error:", errorText);
       throw new Error(`Azure OpenAI API error: ${openAIResponse.status} ${errorText}`);
     }
     
     const openAIData = await openAIResponse.json();
+    console.log("Azure OpenAI response received");
     
     if (!openAIData.choices || !openAIData.choices[0] || !openAIData.choices[0].message) {
+      console.error("Invalid Azure OpenAI response:", JSON.stringify(openAIData));
       throw new Error('Invalid response from Azure OpenAI');
     }
     
     // Extract the parsed resume from the AI response
     const aiResponseContent = openAIData.choices[0].message.content;
+    console.log("AI response content:", aiResponseContent.substring(0, 100) + "...");
+    
     let parsedResume: ParsedResume;
     
     try {
@@ -157,8 +169,11 @@ serve(async (req: Request) => {
       
       // Validate required fields
       if (!parsedResume.name || !parsedResume.email || !Array.isArray(parsedResume.experience)) {
+        console.error("Missing required fields in parsed resume:", JSON.stringify(parsedResume));
         throw new Error('Missing required fields in parsed resume');
       }
+      
+      console.log("Successfully parsed resume data");
     } catch (parseError) {
       console.error('Failed to parse JSON from Azure OpenAI response:', parseError);
       console.log('Raw response:', aiResponseContent);
@@ -166,24 +181,29 @@ serve(async (req: Request) => {
     }
     
     // 3. Store the result in the ai_results table
-    console.log("Storing parsed resume result...");
+    console.log("Storing parsed resume result in ai_results table...");
+    
     // Type assertion to work around the type issue
-    const { data: aiResultData, error: aiResultError } = await (supabase as any)
+    const { data: aiResultData, error: aiResultError } = await supabase
       .from('ai_results')
       .insert({
         job_type: "resume_parse",
         candidate_id,
         org_id,
         result: parsedResume
-      })
+      } as any)
       .select('id')
       .single();
     
     if (aiResultError) {
+      console.error("Error storing AI result:", aiResultError);
       throw new Error(`Failed to store AI result: ${aiResultError.message}`);
     }
     
+    console.log("AI result stored with ID:", aiResultData.id);
+    
     // 4. Update the candidate record with the parsed email if it's empty
+    console.log("Checking if candidate email needs to be updated...");
     const { data: candidate, error: fetchCandidateError } = await supabase
       .from('candidates')
       .select('email, job_id')
@@ -191,19 +211,25 @@ serve(async (req: Request) => {
       .single();
     
     if (fetchCandidateError) {
+      console.error("Error fetching candidate:", fetchCandidateError);
       throw new Error(`Failed to fetch candidate: ${fetchCandidateError.message}`);
     }
     
-    if (!candidate.email) {
-      console.log("Updating candidate with parsed email...");
+    if (!candidate.email && parsedResume.email) {
+      console.log("Updating candidate with parsed email:", parsedResume.email);
       const { error: updateCandidateError } = await supabase
         .from('candidates')
         .update({ email: parsedResume.email })
         .eq('id', candidate_id);
       
       if (updateCandidateError) {
+        console.error("Error updating candidate:", updateCandidateError);
         throw new Error(`Failed to update candidate: ${updateCandidateError.message}`);
       }
+      
+      console.log("Candidate email updated successfully");
+    } else {
+      console.log("Candidate already has an email, skipping update");
     }
     
     // 5. Create additional workflow jobs
@@ -227,11 +253,14 @@ serve(async (req: Request) => {
     
     const { error: workflowJobsError } = await supabase
       .from('workflow_jobs')
-      .insert(workflowJobsData);
+      .insert(workflowJobsData as any);
     
     if (workflowJobsError) {
+      console.error("Error creating workflow jobs:", workflowJobsError);
       throw new Error(`Failed to create workflow jobs: ${workflowJobsError.message}`);
     }
+    
+    console.log("Follow-up workflow jobs created successfully");
     
     // Return success response
     return new Response(

@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/use-toast";
 
 // Define the parsed resume structure
 export interface ParsedResume {
@@ -46,6 +47,12 @@ export class ResumeParserAgent {
     try {
       console.log(`Calling parse-resume Edge Function for candidate ${this.input.candidate_id}`);
       
+      // Show toast notification
+      toast({
+        title: "Processing Resume",
+        description: "Extracting and analyzing candidate information...",
+      });
+      
       // Call the Edge Function to parse the resume
       const { data, error } = await supabase.functions.invoke('parse-resume', {
         body: {
@@ -57,6 +64,12 @@ export class ResumeParserAgent {
       
       if (error) {
         console.error('Error calling parse-resume function:', error);
+        toast({
+          title: "Resume Parsing Failed",
+          description: `Failed to parse resume: ${error.message}`,
+          variant: "destructive"
+        });
+        
         return { 
           success: false, 
           message: `Failed to parse resume: ${error.message}` 
@@ -64,11 +77,23 @@ export class ResumeParserAgent {
       }
       
       if (!data.success) {
+        toast({
+          title: "Resume Parsing Failed",
+          description: data.message || 'Unknown error in parse-resume function',
+          variant: "destructive"
+        });
+        
         return { 
           success: false, 
           message: data.message || 'Unknown error in parse-resume function' 
         };
       }
+      
+      // Show success toast
+      toast({
+        title: "Resume Processed Successfully",
+        description: "Candidate information has been extracted and analyzed.",
+      });
       
       return { 
         success: true, 
@@ -77,6 +102,13 @@ export class ResumeParserAgent {
       
     } catch (error) {
       console.error("Error running ResumeParserAgent:", error);
+      
+      toast({
+        title: "Resume Parsing Error",
+        description: `Error processing resume: ${error instanceof Error ? error.message : String(error)}`,
+        variant: "destructive"
+      });
+      
       return { 
         success: false, 
         message: `Error running ResumeParserAgent: ${error instanceof Error ? error.message : String(error)}` 
