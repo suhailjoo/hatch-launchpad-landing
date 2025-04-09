@@ -58,7 +58,7 @@
   
   /* Updated subtle sidebar gradient */
   .sidebar-gradient-subtle {
-    @apply bg-gradient-to-br from-white/80 via-white/70 to-white/60 backdrop-blur-lg border-r border-white/20 shadow-lg;
+    @apply bg-gradient-to-br from-white/95 via-white/90 to-hatch-lightBlue/10 backdrop-blur-lg border-r border-white/20 shadow-lg;
   }
   
   /* Glass effect for active menu items */

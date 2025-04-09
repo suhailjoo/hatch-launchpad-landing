@@ -96,22 +96,22 @@ const AppSidebar = ({
 
   return (
     <Sidebar 
-      className="border-r shadow-xl fixed h-full transition-all duration-300 ease-in-out bg-white/60 backdrop-blur-lg" 
+      className="border-r shadow-xl fixed h-full transition-all duration-300 ease-in-out glass-effect sidebar-gradient-subtle" 
       collapsible="icon" // Keep icons visible when collapsed
     >
       {/* Sidebar header with logo and collapse button */}
-      <SidebarHeader className={`flex items-center justify-between p-5 border-b border-white/10 bg-gradient-to-br from-hatch-coral/80 to-hatch-blue/80 backdrop-blur-md ${state === "collapsed" ? "p-3" : ""}`}>
+      <SidebarHeader className={`flex items-center justify-between p-5 border-b border-white/10 bg-gradient-to-br from-hatch-coral/80 to-hatch-blue/80 backdrop-blur-md relative ${state === "collapsed" ? "p-3" : ""}`}>
         <div className="flex items-center">
           <Logo variant={state === "collapsed" ? "short" : "long"} className={`text-2xl ${state === "collapsed" ? "mx-auto" : ""}`} />
         </div>
         
-        {/* Collapse button positioned at the right side */}
+        {/* Collapse button positioned to avoid logo overlap */}
         <button
           onClick={toggleSidebar}
-          className={`p-1.5 rounded-full text-white/70 hover:bg-white/10 hover:text-white transition-colors absolute ${state === "collapsed" ? "right-2" : "right-4"}`}
+          className={`p-1.5 rounded-full text-white/70 hover:bg-white/10 hover:text-white transition-colors absolute ${state === "collapsed" ? "right-1.5 top-1.5" : "right-4"}`}
           aria-label={state === "collapsed" ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {state === "collapsed" ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          {state === "collapsed" ? <ChevronRight size={16} /> : <ChevronLeft size={18} />}
         </button>
       </SidebarHeader>
       
@@ -200,7 +200,7 @@ const AppSidebar = ({
       </SidebarContent>
       
       {/* Sidebar footer with logout button */}
-      <SidebarFooter className={`mt-auto p-5 border-t border-gray-100 ${state === "collapsed" ? "p-3" : ""}`}>
+      <SidebarFooter className={`mt-auto p-5 border-t border-gray-100/20 ${state === "collapsed" ? "p-3" : ""}`}>
         <button 
           onClick={handleLogout} 
           className={`flex items-center gap-4 px-4 py-3 w-full rounded-lg text-gray-600 hover:bg-red-50 transition-all hover:text-red-600 ${state === "collapsed" ? "px-0 justify-center" : ""}`}
