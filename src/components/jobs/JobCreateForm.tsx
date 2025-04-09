@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Briefcase, FileText, Building, Home, Computer, DollarSign, Loader2 } from "lucide-react";
+import { Briefcase, FileText, Building, Home, Computer, DollarSign, Loader2, MapPin } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -32,6 +32,7 @@ const JobFormSchema = z.object({
   title: z.string().min(1, { message: "Job title is required" }),
   description: z.string().min(10, { message: "Description must be at least 10 characters" }),
   department: z.string({ required_error: "Please select a department" }),
+  location: z.string().min(1, { message: "Location is required" }),
   work_type: z.enum(["in_office", "hybrid", "remote"], { 
     required_error: "Please select a work type" 
   }),
@@ -55,6 +56,7 @@ const JobCreateForm = () => {
       title: "",
       description: "",
       department: "",
+      location: "",
       work_type: undefined,
       salary_currency: undefined,
       salary_budget: 0,
@@ -184,6 +186,28 @@ const JobCreateForm = () => {
                       <SelectItem value="sales">Sales</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Location Field */}
+        <FormField
+          control={form.control}
+          name="location"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Location</FormLabel>
+              <FormControl>
+                <div className="flex items-center gap-2 relative">
+                  <MapPin className="absolute left-3 text-gray-500" size={18} />
+                  <Input 
+                    placeholder="e.g. New York, NY or Remote" 
+                    className="pl-10"
+                    {...field} 
+                  />
                 </div>
               </FormControl>
               <FormMessage />

@@ -15,6 +15,7 @@ export type Database = {
           department: string
           description: string
           id: string
+          location: string
           org_id: string
           salary_budget: number
           salary_currency: string
@@ -27,6 +28,7 @@ export type Database = {
           department: string
           description: string
           id?: string
+          location: string
           org_id: string
           salary_budget: number
           salary_currency: string
@@ -39,6 +41,7 @@ export type Database = {
           department?: string
           description?: string
           id?: string
+          location?: string
           org_id?: string
           salary_budget?: number
           salary_currency?: string

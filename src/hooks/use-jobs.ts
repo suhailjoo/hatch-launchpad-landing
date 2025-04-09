@@ -9,6 +9,7 @@ export type Job = {
   title: string;
   description: string;
   department: string;
+  location: string;
   work_type: "in_office" | "hybrid" | "remote";
   salary_currency: "USD" | "CAD" | "EUR" | "GBP" | "INR" | "THB" | "VND" | "SGD" | "AUD";
   salary_budget: number;

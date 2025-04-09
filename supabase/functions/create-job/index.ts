@@ -14,6 +14,7 @@ const JobCreateInput = z.object({
   title: z.string().min(1, "Job title is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
   department: z.string().min(1, "Department is required"),
+  location: z.string().min(1, "Location is required"),
   work_type: z.enum(["in_office", "hybrid", "remote"], {
     required_error: "Work type must be one of: in_office, hybrid, remote",
   }),
@@ -116,6 +117,7 @@ serve(async (req) => {
         title: jobData.title,
         description: jobData.description,
         department: jobData.department,
+        location: jobData.location,
         work_type: jobData.work_type,
         salary_currency: jobData.salary_currency,
         salary_budget: jobData.salary_budget,
