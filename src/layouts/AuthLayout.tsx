@@ -18,7 +18,7 @@ import {
   useSidebar,
   SidebarRail
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Briefcase, Users, Settings, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { LayoutDashboard, Briefcase, Users, Settings, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
 import Logo from "@/components/Logo";
 
 // Main AuthLayout component that handles authentication logic
@@ -58,6 +58,8 @@ const AuthLayout = () => {
 
 // Separate component for the layout content to use useSidebar hook safely
 const AuthLayoutContent = ({ currentPath }: { currentPath: string }) => {
+  const { state } = useSidebar();
+  
   return (
     <div className="flex min-h-screen w-full bg-gradient-to-br from-gray-50 to-hatch-lightBlue/10">
       <AppSidebar currentPath={currentPath} />
@@ -65,7 +67,7 @@ const AuthLayoutContent = ({ currentPath }: { currentPath: string }) => {
       {/* Adding SidebarRail for better control of collapsed sidebar */}
       <SidebarRail className="z-30" />
       
-      <main className="flex-1 p-8 overflow-auto animate-fade-in">
+      <main className={`flex-1 p-8 overflow-auto animate-fade-in transition-all duration-200 ${state === "collapsed" ? "ml-[60px]" : ""}`}>
         <div className="max-w-7xl mx-auto">
           <Outlet />
         </div>
@@ -82,7 +84,7 @@ const AppSidebar = ({
 }) => {
   const navigate = useNavigate();
   const { logout } = useAuthStore();
-  const { state, toggleSidebar } = useSidebar(); // Get the state from useSidebar
+  const { state, toggleSidebar } = useSidebar();
   
   const handleLogout = async () => {
     await logout();
@@ -94,7 +96,7 @@ const AppSidebar = ({
 
   return (
     <Sidebar 
-      className="border-r shadow-lg bg-gradient-to-b from-hatch-blue/10 to-hatch-coral/5 backdrop-blur-sm" 
+      className="border-r shadow-lg bg-gradient-to-b from-hatch-blue/10 to-hatch-coral/5 backdrop-blur-sm fixed h-full" 
       collapsible="icon" // Keep icons visible when collapsed
     >
       {/* Sidebar header with logo and collapse button */}
@@ -103,13 +105,14 @@ const AppSidebar = ({
           <Logo variant={state === "collapsed" ? "short" : "long"} className="text-2xl" />
         </div>
         
-        {/* Moving the collapse button to the right side */}
-        <SidebarTrigger 
+        {/* Collapse button positioned at the right side */}
+        <button
           onClick={toggleSidebar}
           className="p-1.5 rounded-md hover:bg-hatch-blue/10 text-hatch-blue transition-colors"
+          aria-label={state === "collapsed" ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {state === "collapsed" ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
-        </SidebarTrigger>
+          {state === "collapsed" ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </button>
       </SidebarHeader>
       
       {/* Main sidebar content with menu groups */}
