@@ -16,7 +16,7 @@ export type Job = {
 };
 
 export const useJobs = () => {
-  const { user } = useAuthStore();
+  const { user, refreshSession } = useAuthStore();
   
   return useQuery({
     queryKey: ["jobs"],
@@ -25,39 +25,70 @@ export const useJobs = () => {
         throw new Error("User not authenticated");
       }
       
-      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError || !sessionData.session) {
-        console.error("Session error:", sessionError);
-        throw new Error("Failed to get authentication session");
+      try {
+        // Get current session
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+          console.error("Session error:", sessionError);
+          // Try to refresh the session
+          await refreshSession();
+          // Get the refreshed session
+          const { data: refreshedSessionData, error: refreshError } = await supabase.auth.getSession();
+          
+          if (refreshError || !refreshedSessionData.session) {
+            console.error("Failed to refresh session:", refreshError);
+            throw new Error("Authentication session expired");
+          }
+          
+          console.log("Session refreshed successfully");
+        }
+        
+        if (!sessionData.session) {
+          console.error("No active session found");
+          throw new Error("No active session");
+        }
+        
+        console.log("Session token available:", !!sessionData.session.access_token);
+        
+        const response = await fetch("https://jaoxflaynrxgfljlorew.supabase.co/functions/v1/jobs-list", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${sessionData.session.access_token}`,
+          },
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Jobs API error:", errorData);
+          
+          // Handle authentication errors specifically
+          if (response.status === 401) {
+            console.log("Authentication error, attempting to refresh session");
+            await refreshSession();
+            throw new Error("Session expired. Please try again.");
+          }
+          
+          const errorMessage = errorData.error || `Failed to fetch jobs (${response.status})`;
+          throw new Error(errorMessage);
+        }
+        
+        const data = await response.json();
+        return data.jobs || [];
+      } catch (error) {
+        console.error("Error in jobs fetching:", error);
+        throw error;
       }
-      
-      console.log("Session token available:", !!sessionData.session.access_token);
-      
-      const response = await fetch("https://jaoxflaynrxgfljlorew.supabase.co/functions/v1/jobs-list", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${sessionData.session.access_token}`,
-        },
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Jobs API error:", errorData);
-        const errorMessage = errorData.error || `Failed to fetch jobs (${response.status})`;
-        throw new Error(errorMessage);
-      }
-      
-      const data = await response.json();
-      return data.jobs || [];
     },
     enabled: !!user,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: 1,
     meta: {
       onError: (error: Error) => {
         console.error("Error fetching jobs:", error);
         toast({
           title: "Error",
-          description: "Failed to load jobs. Please try again.",
+          description: error.message || "Failed to load jobs. Please try again.",
           variant: "destructive",
         });
       },
