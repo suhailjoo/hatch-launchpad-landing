@@ -78,13 +78,13 @@ const Auth = () => {
                 <TabsList className="grid grid-cols-2 w-full">
                   <TabsTrigger 
                     value="signup"
-                    className="bg-gradient-to-r from-hatch-coral/80 to-hatch-coral/70 data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=active]:from-hatch-coral data-[state=active]:to-hatch-coral font-medium"
+                    className={`${activeTab === "signup" ? "bg-gradient-to-r from-hatch-coral to-hatch-coral" : "bg-transparent"} data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=active]:from-hatch-coral data-[state=active]:to-hatch-coral data-[state=active]:text-white font-medium`}
                   >
                     Sign Up
                   </TabsTrigger>
                   <TabsTrigger 
                     value="login"
-                    className="bg-gradient-to-r from-hatch-blue/80 to-hatch-blue/70 data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=active]:from-hatch-blue data-[state=active]:to-hatch-blue font-medium"
+                    className={`${activeTab === "login" ? "bg-gradient-to-r from-hatch-blue to-hatch-blue" : "bg-transparent"} data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=active]:from-hatch-blue data-[state=active]:to-hatch-blue data-[state=active]:text-white font-medium`}
                   >
                     Log In
                   </TabsTrigger>
