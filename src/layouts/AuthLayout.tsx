@@ -100,15 +100,16 @@ const AppSidebar = ({
       collapsible="icon" // Keep icons visible when collapsed
     >
       {/* Sidebar header with logo and collapse button */}
-      <SidebarHeader className={`flex items-center justify-between p-5 border-b border-white/10 bg-gradient-to-br from-hatch-coral/80 to-hatch-blue/80 backdrop-blur-md relative ${state === "collapsed" ? "p-3" : ""}`}>
+      <SidebarHeader className={`flex items-center justify-between p-5 border-b border-white/10 bg-gradient-to-br from-hatch-coral/80 to-hatch-blue/80 backdrop-blur-md ${state === "collapsed" ? "p-3" : ""}`}>
         <div className="flex items-center">
-          <Logo variant={state === "collapsed" ? "short" : "long"} className={`text-2xl ${state === "collapsed" ? "mx-auto" : ""}`} />
+          <Logo variant={state === "collapsed" ? "short" : "long"} className={state === "collapsed" ? "ml-0.5" : ""} />
         </div>
         
-        {/* Collapse button positioned to avoid logo overlap */}
+        {/* Properly positioned collapse button */}
         <button
           onClick={toggleSidebar}
-          className={`p-1.5 rounded-full text-white/70 hover:bg-white/10 hover:text-white transition-colors absolute ${state === "collapsed" ? "right-1.5 top-1.5" : "right-4"}`}
+          className={`p-1.5 rounded-full text-white/70 hover:bg-white/10 hover:text-white transition-colors
+            ${state === "collapsed" ? "absolute right-2 top-3" : "ml-2"}`}
           aria-label={state === "collapsed" ? "Expand sidebar" : "Collapse sidebar"}
         >
           {state === "collapsed" ? <ChevronRight size={16} /> : <ChevronLeft size={18} />}
@@ -133,7 +134,7 @@ const AppSidebar = ({
                   tooltip="Dashboard"
                 >
                   <Link to="/dashboard" className={`flex items-center gap-4 px-4 py-3 text-gray-700 hover:text-gray-900 ${state === "collapsed" ? "px-0 justify-center" : ""}`}>
-                    <div className={`p-2 bg-hatch-coral/10 backdrop-blur-sm rounded-lg shadow-sm ${state === "collapsed" ? "mx-auto" : ""}`}>
+                    <div className={`p-2 bg-hatch-coral/10 backdrop-blur-sm rounded-lg shadow-sm ${state === "collapsed" ? "" : ""}`}>
                       <LayoutDashboard className="text-hatch-coral" size={20} />
                     </div>
                     {state !== "collapsed" && <span className="font-medium">Dashboard</span>}
@@ -151,7 +152,7 @@ const AppSidebar = ({
                   tooltip="Jobs"
                 >
                   <Link to="/jobs" className={`flex items-center gap-4 px-4 py-3 text-gray-700 hover:text-gray-900 ${state === "collapsed" ? "px-0 justify-center" : ""}`}>
-                    <div className={`p-2 bg-hatch-blue/10 backdrop-blur-sm rounded-lg shadow-sm ${state === "collapsed" ? "mx-auto" : ""}`}>
+                    <div className={`p-2 bg-hatch-blue/10 backdrop-blur-sm rounded-lg shadow-sm ${state === "collapsed" ? "" : ""}`}>
                       <Briefcase className="text-hatch-blue" size={20} />
                     </div>
                     {state !== "collapsed" && <span className="font-medium">Jobs</span>}
@@ -169,7 +170,7 @@ const AppSidebar = ({
                   tooltip="Candidates"
                 >
                   <Link to="/pipeline" className={`flex items-center gap-4 px-4 py-3 text-gray-700 hover:text-gray-900 ${state === "collapsed" ? "px-0 justify-center" : ""}`}>
-                    <div className={`p-2 bg-hatch-gold/10 backdrop-blur-sm rounded-lg shadow-sm ${state === "collapsed" ? "mx-auto" : ""}`}>
+                    <div className={`p-2 bg-hatch-gold/10 backdrop-blur-sm rounded-lg shadow-sm ${state === "collapsed" ? "" : ""}`}>
                       <Users className="text-hatch-gold" size={20} />
                     </div>
                     {state !== "collapsed" && <span className="font-medium">Candidates</span>}
@@ -187,7 +188,7 @@ const AppSidebar = ({
                   tooltip="Settings"
                 >
                   <Link to="/settings" className={`flex items-center gap-4 px-4 py-3 text-gray-700 hover:text-gray-900 ${state === "collapsed" ? "px-0 justify-center" : ""}`}>
-                    <div className={`p-2 bg-hatch-yellow/10 backdrop-blur-sm rounded-lg shadow-sm ${state === "collapsed" ? "mx-auto" : ""}`}>
+                    <div className={`p-2 bg-hatch-yellow/10 backdrop-blur-sm rounded-lg shadow-sm ${state === "collapsed" ? "" : ""}`}>
                       <Settings className="text-hatch-yellow" size={20} />
                     </div>
                     {state !== "collapsed" && <span className="font-medium">Settings</span>}
@@ -207,7 +208,7 @@ const AppSidebar = ({
           aria-label="Log out"
           title={state === "collapsed" ? "Log out" : undefined}
         >
-          <div className={`p-2 bg-red-50 rounded-lg ${state === "collapsed" ? "mx-auto" : ""}`}>
+          <div className={`p-2 bg-red-50 rounded-lg ${state === "collapsed" ? "" : ""}`}>
             <LogOut size={18} className="text-red-500" />
           </div>
           {state !== "collapsed" && <span className="font-medium">Log out</span>}
