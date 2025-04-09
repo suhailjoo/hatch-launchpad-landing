@@ -89,7 +89,7 @@ serve(async (req: Request) => {
     console.log(`Calling Azure OpenAI (${azureOpenAIDeploymentId}) to parse resume...`);
     
     // Construct the Azure OpenAI API URL
-    const azureOpenAIUrl = `${azureOpenAIEndpoint}/openai/deployments/${azureOpenAIDeploymentId}/chat/completions?api-version=2023-05-15`;
+    const azureOpenAIUrl = `${azureOpenAIEndpoint}/openai/deployments/${azureOpenAIDeploymentId}/chat/completions?api-version=2025-01-01-preview`;
     
     // System message for parsing resumes
     const systemMessage = `
