@@ -78,7 +78,7 @@ const JobCreateForm = () => {
         min: 0,
         max: 5
       },
-      required_skills: "", // This is fine as a string because our schema transforms it to string[]
+      required_skills: "" as unknown as string[], // Cast empty string to string[] to satisfy TypeScript
     },
   });
 
