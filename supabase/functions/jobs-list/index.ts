@@ -34,6 +34,58 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Helper function to get authenticated user
+async function getAuthenticatedUser(req: Request) {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || ''
+  
+  // Extract the JWT token from the Authorization header
+  const authHeader = req.headers.get('Authorization') || ''
+  const token = authHeader.replace('Bearer ', '')
+  
+  if (!token) {
+    throw new Error('Missing authorization header')
+  }
+  
+  // Create Supabase client
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: authHeader
+      }
+    }
+  })
+  
+  // Get user from the JWT
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+  
+  if (userError || !user) {
+    throw new Error('Unauthorized')
+  }
+  
+  return { supabase, user, token }
+}
+
+// Helper function to get user's organization
+async function getUserOrg(userId: string) {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
+  const adminSupabase = createClient(supabaseUrl, supabaseServiceKey)
+  
+  // Fetch user data from the users table
+  const { data: userData, error: userDataError } = await adminSupabase
+    .from('users')
+    .select('org_id')
+    .eq('user_id', userId)
+    .single()
+  
+  if (userDataError || !userData) {
+    throw new Error('User record not found')
+  }
+  
+  return userData
+}
+
 serve(async (req) => {
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
@@ -49,59 +101,35 @@ serve(async (req) => {
       })
     }
 
-    // Get Supabase environment variables
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || ''
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-
-    // Get auth token from request
-    const authHeader = req.headers.get('Authorization') || ''
-    const token = authHeader.replace('Bearer ', '')
-
-    if (!token) {
-      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
+    // Get authenticated user
+    let user;
+    
+    try {
+      const auth = await getAuthenticatedUser(req);
+      user = auth.user;
+    } catch (error) {
+      return new Response(JSON.stringify({ error: error.message }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
-
-    // Create a Supabase client to verify the token
-    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-      global: {
-        headers: {
-          Authorization: authHeader,
-        },
-      },
-    })
-
-    // Verify the token and get the user
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token)
-
-    if (userError || !user) {
-      console.error('User verification error:', userError)
-      return new Response(JSON.stringify({ error: 'Unauthorized or invalid token' }), {
-        status: 401,
+    
+    // Get user's organization
+    let userData;
+    
+    try {
+      userData = await getUserOrg(user.id);
+    } catch (error) {
+      return new Response(JSON.stringify({ error: error.message }), {
+        status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
 
     // Create admin client with service role to bypass RLS
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
     const adminSupabase = createClient(supabaseUrl, supabaseServiceKey)
-
-    // Get the user's organization id
-    const { data: userData, error: userDataError } = await adminSupabase
-      .from('users')
-      .select('org_id')
-      .eq('user_id', user.id)
-      .single()
-
-    if (userDataError || !userData) {
-      console.error('Error fetching user data:', userDataError)
-      return new Response(JSON.stringify({ error: 'User organization not found' }), {
-        status: 404,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
 
     // Use the org_id to fetch jobs
     const { data: jobs, error: jobsError } = await adminSupabase

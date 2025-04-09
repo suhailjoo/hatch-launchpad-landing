@@ -37,29 +37,53 @@ const JobCreateResponse = z.object({
   job_id: z.string(),
 });
 
-// Initialize Supabase client using Deno runtime
-const supabaseClient = (req: Request) => {
-  const authHeader = req.headers.get('Authorization');
+// Helper function to get authenticated user
+async function getAuthenticatedUser(req: Request) {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || ''
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || ''
   
-  if (!authHeader) {
-    throw new Error('Missing Authorization header');
+  // Extract the JWT token from the Authorization header
+  const authHeader = req.headers.get('Authorization') || ''
+  const token = authHeader.replace('Bearer ', '')
+  
+  if (!token) {
+    throw new Error('Missing authorization header')
   }
   
-  const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-  
-  return createClient(
-    supabaseUrl,
-    supabaseServiceKey,
-    {
-      global: {
-        headers: {
-          Authorization: authHeader,
-        },
-      },
+  // Create Supabase client
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: authHeader
+      }
     }
-  );
-};
+  })
+  
+  // Get user from the JWT
+  const { data: { user }, error: userError } = await supabase.auth.getUser(token)
+  
+  if (userError || !user) {
+    throw new Error('Unauthorized')
+  }
+  
+  return { supabase, user, token }
+}
+
+// Helper function to get user's organization
+async function getUserOrg(userId: string, supabase: any) {
+  // Fetch user data from the users table
+  const { data: userData, error: userDataError } = await supabase
+    .from('users')
+    .select('org_id')
+    .eq('user_id', userId)
+    .single()
+  
+  if (userDataError || !userData) {
+    throw new Error('User record not found')
+  }
+  
+  return userData
+}
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -76,15 +100,17 @@ serve(async (req) => {
   }
   
   try {
-    // Initialize Supabase client
-    const supabase = supabaseClient(req);
+    // Get authenticated user
+    let user;
+    let supabase;
     
-    // Get the authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
+    try {
+      const auth = await getAuthenticatedUser(req);
+      user = auth.user;
+      supabase = auth.supabase;
+    } catch (error) {
       return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
+        JSON.stringify({ error: error.message }),
         { status: 401, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
     }
@@ -106,22 +132,24 @@ serve(async (req) => {
     const jobData = parsedInput.data;
     
     // Get user's org_id from the users table
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('org_id')
-      .eq('user_id', user.id)
-      .single();
+    let userData;
     
-    if (userError || !userData) {
-      console.error("User data error:", userError);
+    try {
+      userData = await getUserOrg(user.id, supabase);
+    } catch (error) {
       return new Response(
-        JSON.stringify({ error: 'Failed to retrieve user organization data' }),
+        JSON.stringify({ error: error.message }),
         { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
     }
     
+    // Use service role for insert operations
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    const adminSupabase = createClient(supabaseUrl, supabaseServiceKey);
+    
     // Insert job into jobs table
-    const { data: insertedJob, error: jobError } = await supabase
+    const { data: insertedJob, error: jobError } = await adminSupabase
       .from('jobs')
       .insert({
         title: jobData.title,
@@ -147,7 +175,7 @@ serve(async (req) => {
     }
     
     // Insert workflow job for market salary analysis
-    const { error: workflowError } = await supabase
+    const { error: workflowError } = await adminSupabase
       .from('workflow_jobs')
       .insert({
         job_type: 'fetch_market_salary',
