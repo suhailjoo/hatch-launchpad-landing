@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,7 +17,6 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-gradient-to-br from-hatch-blue/90 via-white to-hatch-coral/90 relative overflow-hidden">
-      {/* Enhanced animated background elements */}
       <div className="absolute inset-0 w-full h-full overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent opacity-60"></div>
         <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-hatch-blue/40 rounded-full blur-3xl mix-blend-multiply animate-pulse"></div>
@@ -26,18 +24,15 @@ const Auth = () => {
         <div className="absolute top-1/4 right-1/4 w-64 h-64 bg-hatch-yellow/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: "0.8s" }}></div>
         <div className="absolute bottom-1/3 left-1/4 w-80 h-80 bg-hatch-gold/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: "1.2s" }}></div>
         
-        {/* Symmetrical decorative elements */}
         <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 backdrop-blur-sm rounded-xl rotate-12 border border-white/20"></div>
         <div className="absolute top-10 right-10 w-20 h-20 bg-white/10 backdrop-blur-sm rounded-xl -rotate-12 border border-white/20"></div>
         <div className="absolute bottom-10 left-10 w-20 h-20 bg-white/10 backdrop-blur-sm rounded-xl -rotate-12 border border-white/20"></div>
         <div className="absolute bottom-10 right-10 w-20 h-20 bg-white/10 backdrop-blur-sm rounded-xl rotate-12 border border-white/20"></div>
         
-        {/* Glass overlay for better contrast */}
         <div className="absolute inset-0 bg-white/40 backdrop-blur-sm"></div>
       </div>
 
       <div className="w-full max-w-md relative z-10">
-        {/* Logo and header section with enhanced animations */}
         <motion.div 
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -78,20 +73,22 @@ const Auth = () => {
               onValueChange={setActiveTab}
               className="w-full"
             >
-              <TabsList className="grid grid-cols-2 w-full p-1 bg-muted/40 rounded-xl m-4 shadow-inner">
-                <TabsTrigger 
-                  value="signup"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hatch-coral data-[state=active]:to-hatch-coral/80 data-[state=active]:text-white data-[state=active]:shadow-md rounded-lg py-2.5 transition-all duration-300"
-                >
-                  Sign Up
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="login"
-                  className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-hatch-blue data-[state=active]:to-hatch-blue/80 data-[state=active]:text-white data-[state=active]:shadow-md rounded-lg py-2.5 transition-all duration-300"
-                >
-                  Log In
-                </TabsTrigger>
-              </TabsList>
+              <div className="px-6 pt-6">
+                <TabsList className="grid grid-cols-2 w-full">
+                  <TabsTrigger 
+                    value="signup"
+                    className="bg-gradient-to-r from-hatch-coral/80 to-hatch-coral/70 data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=active]:from-hatch-coral data-[state=active]:to-hatch-coral font-medium"
+                  >
+                    Sign Up
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="login"
+                    className="bg-gradient-to-r from-hatch-blue/80 to-hatch-blue/70 data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=active]:from-hatch-blue data-[state=active]:to-hatch-blue font-medium"
+                  >
+                    Log In
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
               <CardContent className="p-6">
                 <TabsContent value="signup" className="mt-0 animate-in fade-in-50 zoom-in-95 duration-300">
