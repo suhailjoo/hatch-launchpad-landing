@@ -61,7 +61,7 @@ const AuthLayoutContent = ({ currentPath }: { currentPath: string }) => {
   const { state } = useSidebar();
   
   return (
-    <div className="flex min-h-screen w-full bg-gradient-to-br from-gray-50 to-hatch-lightBlue/10">
+    <div className="flex min-h-screen w-full bg-gradient-to-br from-gray-50 to-hatch-lightBlue/5">
       <AppSidebar currentPath={currentPath} />
       
       {/* Adding SidebarRail for better control of collapsed sidebar */}
@@ -96,11 +96,11 @@ const AppSidebar = ({
 
   return (
     <Sidebar 
-      className="border-r shadow-xl fixed h-full transition-all duration-300 ease-in-out sidebar-gradient" 
+      className="border-r shadow-xl fixed h-full transition-all duration-300 ease-in-out bg-white/60 backdrop-blur-lg" 
       collapsible="icon" // Keep icons visible when collapsed
     >
       {/* Sidebar header with logo and collapse button */}
-      <SidebarHeader className={`flex items-center justify-between p-5 border-b border-white/10 ${state === "collapsed" ? "p-3" : ""}`}>
+      <SidebarHeader className={`flex items-center justify-between p-5 border-b border-white/10 bg-gradient-to-br from-hatch-coral/80 to-hatch-blue/80 backdrop-blur-md ${state === "collapsed" ? "p-3" : ""}`}>
         <div className="flex items-center">
           <Logo variant={state === "collapsed" ? "short" : "long"} className={`text-2xl ${state === "collapsed" ? "mx-auto" : ""}`} />
         </div>
@@ -118,7 +118,7 @@ const AppSidebar = ({
       {/* Main sidebar content with menu groups */}
       <SidebarContent className={`px-4 py-6 ${state === "collapsed" ? "px-2 py-4" : ""}`}>
         <SidebarGroup>
-          <SidebarGroupLabel className={`text-white/70 text-xs font-medium uppercase tracking-wider ml-2 mb-4 ${state === "collapsed" ? "hidden" : ""}`}>
+          <SidebarGroupLabel className={`text-gray-500 text-xs font-medium uppercase tracking-wider ml-2 mb-4 ${state === "collapsed" ? "hidden" : ""}`}>
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -127,14 +127,14 @@ const AppSidebar = ({
                 <SidebarMenuButton 
                   asChild 
                   isActive={isActive("/dashboard")}
-                  className={`hover:bg-white/10 rounded-lg transition-all duration-200 
-                    data-[active=true]:bg-white/15 data-[active=true]:backdrop-blur-sm data-[active=true]:text-white
+                  className={`hover:bg-gradient-to-r hover:from-hatch-coral/10 hover:to-hatch-blue/10 rounded-lg transition-all duration-200 
+                    data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/15 data-[active=true]:to-hatch-blue/15 data-[active=true]:backdrop-blur-sm data-[active=true]:border data-[active=true]:border-white/10 data-[active=true]:shadow-md
                     ${state === "collapsed" ? "justify-center" : ""}`}
                   tooltip="Dashboard"
                 >
-                  <Link to="/dashboard" className={`flex items-center gap-4 px-4 py-3 text-white/80 hover:text-white ${state === "collapsed" ? "px-0 justify-center" : ""}`}>
-                    <div className={`p-2 bg-hatch-coral/20 backdrop-blur-sm rounded-lg ${state === "collapsed" ? "mx-auto" : ""}`}>
-                      <LayoutDashboard className="text-white" size={20} />
+                  <Link to="/dashboard" className={`flex items-center gap-4 px-4 py-3 text-gray-700 hover:text-gray-900 ${state === "collapsed" ? "px-0 justify-center" : ""}`}>
+                    <div className={`p-2 bg-hatch-coral/10 backdrop-blur-sm rounded-lg shadow-sm ${state === "collapsed" ? "mx-auto" : ""}`}>
+                      <LayoutDashboard className="text-hatch-coral" size={20} />
                     </div>
                     {state !== "collapsed" && <span className="font-medium">Dashboard</span>}
                   </Link>
@@ -145,14 +145,14 @@ const AppSidebar = ({
                 <SidebarMenuButton 
                   asChild 
                   isActive={isActive("/jobs")}
-                  className={`hover:bg-white/10 rounded-lg transition-all duration-200 
-                    data-[active=true]:bg-white/15 data-[active=true]:backdrop-blur-sm data-[active=true]:text-white
+                  className={`hover:bg-gradient-to-r hover:from-hatch-coral/10 hover:to-hatch-blue/10 rounded-lg transition-all duration-200 
+                    data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/15 data-[active=true]:to-hatch-blue/15 data-[active=true]:backdrop-blur-sm data-[active=true]:border data-[active=true]:border-white/10 data-[active=true]:shadow-md
                     ${state === "collapsed" ? "justify-center" : ""}`}
                   tooltip="Jobs"
                 >
-                  <Link to="/jobs" className={`flex items-center gap-4 px-4 py-3 text-white/80 hover:text-white ${state === "collapsed" ? "px-0 justify-center" : ""}`}>
-                    <div className={`p-2 bg-hatch-blue/20 backdrop-blur-sm rounded-lg ${state === "collapsed" ? "mx-auto" : ""}`}>
-                      <Briefcase className="text-white" size={20} />
+                  <Link to="/jobs" className={`flex items-center gap-4 px-4 py-3 text-gray-700 hover:text-gray-900 ${state === "collapsed" ? "px-0 justify-center" : ""}`}>
+                    <div className={`p-2 bg-hatch-blue/10 backdrop-blur-sm rounded-lg shadow-sm ${state === "collapsed" ? "mx-auto" : ""}`}>
+                      <Briefcase className="text-hatch-blue" size={20} />
                     </div>
                     {state !== "collapsed" && <span className="font-medium">Jobs</span>}
                   </Link>
@@ -163,14 +163,14 @@ const AppSidebar = ({
                 <SidebarMenuButton 
                   asChild 
                   isActive={isActive("/pipeline")}
-                  className={`hover:bg-white/10 rounded-lg transition-all duration-200 
-                    data-[active=true]:bg-white/15 data-[active=true]:backdrop-blur-sm data-[active=true]:text-white
+                  className={`hover:bg-gradient-to-r hover:from-hatch-coral/10 hover:to-hatch-blue/10 rounded-lg transition-all duration-200 
+                    data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/15 data-[active=true]:to-hatch-blue/15 data-[active=true]:backdrop-blur-sm data-[active=true]:border data-[active=true]:border-white/10 data-[active=true]:shadow-md
                     ${state === "collapsed" ? "justify-center" : ""}`}
                   tooltip="Candidates"
                 >
-                  <Link to="/pipeline" className={`flex items-center gap-4 px-4 py-3 text-white/80 hover:text-white ${state === "collapsed" ? "px-0 justify-center" : ""}`}>
-                    <div className={`p-2 bg-hatch-gold/20 backdrop-blur-sm rounded-lg ${state === "collapsed" ? "mx-auto" : ""}`}>
-                      <Users className="text-white" size={20} />
+                  <Link to="/pipeline" className={`flex items-center gap-4 px-4 py-3 text-gray-700 hover:text-gray-900 ${state === "collapsed" ? "px-0 justify-center" : ""}`}>
+                    <div className={`p-2 bg-hatch-gold/10 backdrop-blur-sm rounded-lg shadow-sm ${state === "collapsed" ? "mx-auto" : ""}`}>
+                      <Users className="text-hatch-gold" size={20} />
                     </div>
                     {state !== "collapsed" && <span className="font-medium">Candidates</span>}
                   </Link>
@@ -181,14 +181,14 @@ const AppSidebar = ({
                 <SidebarMenuButton 
                   asChild 
                   isActive={isActive("/settings")}
-                  className={`hover:bg-white/10 rounded-lg transition-all duration-200 
-                    data-[active=true]:bg-white/15 data-[active=true]:backdrop-blur-sm data-[active=true]:text-white
+                  className={`hover:bg-gradient-to-r hover:from-hatch-coral/10 hover:to-hatch-blue/10 rounded-lg transition-all duration-200 
+                    data-[active=true]:bg-gradient-to-r data-[active=true]:from-hatch-coral/15 data-[active=true]:to-hatch-blue/15 data-[active=true]:backdrop-blur-sm data-[active=true]:border data-[active=true]:border-white/10 data-[active=true]:shadow-md
                     ${state === "collapsed" ? "justify-center" : ""}`}
                   tooltip="Settings"
                 >
-                  <Link to="/settings" className={`flex items-center gap-4 px-4 py-3 text-white/80 hover:text-white ${state === "collapsed" ? "px-0 justify-center" : ""}`}>
-                    <div className={`p-2 bg-hatch-yellow/20 backdrop-blur-sm rounded-lg ${state === "collapsed" ? "mx-auto" : ""}`}>
-                      <Settings className="text-white" size={20} />
+                  <Link to="/settings" className={`flex items-center gap-4 px-4 py-3 text-gray-700 hover:text-gray-900 ${state === "collapsed" ? "px-0 justify-center" : ""}`}>
+                    <div className={`p-2 bg-hatch-yellow/10 backdrop-blur-sm rounded-lg shadow-sm ${state === "collapsed" ? "mx-auto" : ""}`}>
+                      <Settings className="text-hatch-yellow" size={20} />
                     </div>
                     {state !== "collapsed" && <span className="font-medium">Settings</span>}
                   </Link>
@@ -200,15 +200,15 @@ const AppSidebar = ({
       </SidebarContent>
       
       {/* Sidebar footer with logout button */}
-      <SidebarFooter className={`mt-auto p-5 border-t border-white/10 ${state === "collapsed" ? "p-3" : ""}`}>
+      <SidebarFooter className={`mt-auto p-5 border-t border-gray-100 ${state === "collapsed" ? "p-3" : ""}`}>
         <button 
           onClick={handleLogout} 
-          className={`flex items-center gap-4 px-4 py-3 w-full rounded-lg text-white/70 hover:bg-white/10 transition-all hover:text-white ${state === "collapsed" ? "px-0 justify-center" : ""}`}
+          className={`flex items-center gap-4 px-4 py-3 w-full rounded-lg text-gray-600 hover:bg-red-50 transition-all hover:text-red-600 ${state === "collapsed" ? "px-0 justify-center" : ""}`}
           aria-label="Log out"
           title={state === "collapsed" ? "Log out" : undefined}
         >
-          <div className={`p-2 bg-white/10 rounded-lg ${state === "collapsed" ? "mx-auto" : ""}`}>
-            <LogOut size={18} className="text-white/80" />
+          <div className={`p-2 bg-red-50 rounded-lg ${state === "collapsed" ? "mx-auto" : ""}`}>
+            <LogOut size={18} className="text-red-500" />
           </div>
           {state !== "collapsed" && <span className="font-medium">Log out</span>}
         </button>

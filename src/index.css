@@ -56,6 +56,11 @@
     @apply bg-gradient-to-b from-hatch-coral/90 via-hatch-blue/80 to-hatch-blue/90 backdrop-blur-md;
   }
   
+  /* Updated subtle sidebar gradient */
+  .sidebar-gradient-subtle {
+    @apply bg-gradient-to-br from-white/80 via-white/70 to-white/60 backdrop-blur-lg border-r border-white/20 shadow-lg;
+  }
+  
   /* Glass effect for active menu items */
   .glass-effect {
     @apply backdrop-blur-md bg-white/10 border border-white/20;
