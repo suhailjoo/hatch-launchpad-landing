@@ -14,9 +14,11 @@ export type Database = {
           created_at: string
           department: string
           description: string
+          experience_range: Json
           id: string
           location: string
           org_id: string
+          required_skills: string[]
           salary_budget: number
           salary_currency: string
           title: string
@@ -27,9 +29,11 @@ export type Database = {
           created_at?: string
           department: string
           description: string
+          experience_range: Json
           id?: string
           location: string
           org_id: string
+          required_skills: string[]
           salary_budget: number
           salary_currency: string
           title: string
@@ -40,9 +44,11 @@ export type Database = {
           created_at?: string
           department?: string
           description?: string
+          experience_range?: Json
           id?: string
           location?: string
           org_id?: string
+          required_skills?: string[]
           salary_budget?: number
           salary_currency?: string
           title?: string

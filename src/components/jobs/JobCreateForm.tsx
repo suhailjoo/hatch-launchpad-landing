@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Briefcase, FileText, Building, Home, Computer, DollarSign, Loader2, MapPin } from "lucide-react";
+import { Briefcase, FileText, Building, Home, Computer, DollarSign, Loader2, MapPin, BookOpen, ListChecks } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
@@ -40,6 +40,20 @@ const JobFormSchema = z.object({
     required_error: "Please select a currency"
   }),
   salary_budget: z.coerce.number().min(0, { message: "Salary must be a positive number" }),
+  experience_range: z.object({
+    min: z.coerce.number().min(0, { message: "Minimum experience must be non-negative" }),
+    max: z.coerce.number().min(0, { message: "Maximum experience must be non-negative" })
+  }).refine(data => data.min <= data.max, {
+    message: "Minimum years must be less than or equal to maximum years",
+    path: ["experience_range.min"]
+  }),
+  required_skills: z.string().transform(str => 
+    str.split(',')
+      .map(skill => skill.trim())
+      .filter(skill => skill.length > 0)
+  ).pipe(
+    z.array(z.string().min(1)).min(1, { message: "At least one skill is required" })
+  )
 });
 
 // Define the form type
@@ -60,6 +74,11 @@ const JobCreateForm = () => {
       work_type: undefined,
       salary_currency: undefined,
       salary_budget: 0,
+      experience_range: {
+        min: 0,
+        max: 5
+      },
+      required_skills: "",
     },
   });
 
@@ -210,6 +229,86 @@ const JobCreateForm = () => {
                   />
                 </div>
               </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Experience Range Field */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="experience_range.min"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Minimum Experience (Years)</FormLabel>
+                <FormControl>
+                  <div className="flex items-center gap-2 relative">
+                    <BookOpen className="absolute left-3 text-gray-500" size={18} />
+                    <Input 
+                      type="number" 
+                      min={0}
+                      placeholder="e.g. 1" 
+                      className="pl-10"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e.target.valueAsNumber);
+                      }}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          
+          <FormField
+            control={form.control}
+            name="experience_range.max"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Maximum Experience (Years)</FormLabel>
+                <FormControl>
+                  <div className="flex items-center gap-2 relative">
+                    <BookOpen className="absolute left-3 text-gray-500" size={18} />
+                    <Input 
+                      type="number" 
+                      min={0}
+                      placeholder="e.g. 5" 
+                      className="pl-10"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e.target.valueAsNumber);
+                      }}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Required Skills Field */}
+        <FormField
+          control={form.control}
+          name="required_skills"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Required Skills</FormLabel>
+              <FormControl>
+                <div className="flex items-start gap-2 relative">
+                  <ListChecks className="absolute left-3 top-3 text-gray-500" size={18} />
+                  <Textarea 
+                    placeholder="Enter skills separated by commas (e.g. JavaScript, React, Node.js)" 
+                    className="min-h-20 pl-10"
+                    {...field} 
+                  />
+                </div>
+              </FormControl>
+              <FormDescription>
+                List skills separated by commas
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

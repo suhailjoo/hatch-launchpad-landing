@@ -13,6 +13,11 @@ export type Job = {
   work_type: "in_office" | "hybrid" | "remote";
   salary_currency: "USD" | "CAD" | "EUR" | "GBP" | "INR" | "THB" | "VND" | "SGD" | "AUD";
   salary_budget: number;
+  experience_range: {
+    min: number;
+    max: number;
+  };
+  required_skills: string[];
   created_at: string;
 };
 

@@ -22,6 +22,14 @@ const JobCreateInput = z.object({
     required_error: "Salary currency is required",
   }),
   salary_budget: z.number().min(0, "Salary budget must be a positive number"),
+  experience_range: z.object({
+    min: z.number().min(0, "Minimum experience must be non-negative"),
+    max: z.number().min(0, "Maximum experience must be non-negative")
+  }).refine(data => data.min <= data.max, {
+    message: "Minimum experience must be less than or equal to maximum experience",
+    path: ["experience_range"]
+  }),
+  required_skills: z.array(z.string().min(1, "Each skill must not be empty"))
 });
 
 // Define schema for job creation response
@@ -121,6 +129,8 @@ serve(async (req) => {
         work_type: jobData.work_type,
         salary_currency: jobData.salary_currency,
         salary_budget: jobData.salary_budget,
+        experience_range: jobData.experience_range,
+        required_skills: jobData.required_skills,
         org_id: userData.org_id,
       })
       .select('id')

@@ -9,9 +9,15 @@ const JobSchema = z.object({
   title: z.string(),
   department: z.string(),
   description: z.string().optional(),
+  location: z.string(),
   work_type: z.enum(["in_office", "hybrid", "remote"]),
   salary_currency: z.enum(["USD", "CAD", "EUR", "GBP", "INR", "THB", "VND", "SGD", "AUD"]),
   salary_budget: z.number(),
+  experience_range: z.object({
+    min: z.number(),
+    max: z.number()
+  }),
+  required_skills: z.array(z.string()),
   created_at: z.string()
 })
 
@@ -100,7 +106,7 @@ serve(async (req) => {
     // Use the org_id to fetch jobs
     const { data: jobs, error: jobsError } = await adminSupabase
       .from('jobs')
-      .select('id, title, description, department, work_type, salary_currency, salary_budget, created_at')
+      .select('id, title, description, department, location, work_type, salary_currency, salary_budget, experience_range, required_skills, created_at')
       .eq('org_id', userData.org_id)
       .order('created_at', { ascending: false })
 
