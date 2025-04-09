@@ -153,9 +153,10 @@ const CandidateUploadDialog: React.FC<CandidateUploadDialogProps> = ({
           continue; // Skip to next file
         }
         
+        // Use type assertion to tell TypeScript this is the correct type
         const { data: candidate, error: insertError } = await supabase
           .from('candidates')
-          .insert(candidateData)
+          .insert(candidateData as any)
           .select('id')
           .single();
         
@@ -182,7 +183,7 @@ const CandidateUploadDialog: React.FC<CandidateUploadDialogProps> = ({
         
         const { error: workflowError } = await supabase
           .from('workflow_jobs')
-          .insert(workflowData);
+          .insert(workflowData as any);
         
         if (workflowError) {
           console.error("Error creating workflow job:", workflowError);
