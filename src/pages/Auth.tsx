@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -66,7 +67,7 @@ const Auth = () => {
           transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
           className="relative z-10"
         >
-          <Card className="w-full border border-white/70 bg-white/70 backdrop-blur-xl shadow-2xl rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
+          <Card className="w-full border border-white/70 bg-white/70 backdrop-blur-xl shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
             <Tabs
               defaultValue="login"
               value={activeTab}
