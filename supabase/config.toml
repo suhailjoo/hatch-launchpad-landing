@@ -9,3 +9,6 @@ verify_jwt = true
 
 [functions.create-job]
 verify_jwt = true
+
+[functions.jobs-list]
+verify_jwt = true
