@@ -51,6 +51,16 @@
     @apply bg-gradient-to-r from-hatch-coral to-hatch-blue bg-clip-text text-transparent;
   }
   
+  /* Sidebar gradient background */
+  .sidebar-gradient {
+    @apply bg-gradient-to-b from-hatch-coral/90 via-hatch-blue/80 to-hatch-blue/90 backdrop-blur-md;
+  }
+  
+  /* Glass effect for active menu items */
+  .glass-effect {
+    @apply backdrop-blur-md bg-white/10 border border-white/20;
+  }
+  
   .feature-card {
     @apply p-6 rounded-xl bg-white shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
   }
@@ -202,4 +212,3 @@
     }
   }
 }
-
