@@ -5,16 +5,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SignUpForm from "@/components/auth/SignUpForm";
 import LoginForm from "@/components/auth/LoginForm";
 import Logo from "@/components/Logo";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { useAuthStore } from "@/store/authStore";
 
 const Auth = () => {
   const [activeTab, setActiveTab] = useState<string>("login");
   const [mounted, setMounted] = useState(false);
+  const { user, isInitialized, setSessionFromStorage } = useAuthStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    
+    // Try to restore session on component mount
+    setSessionFromStorage();
+  }, [setSessionFromStorage]);
+  
+  useEffect(() => {
+    // Redirect to dashboard if user is already authenticated
+    if (isInitialized && user) {
+      navigate("/dashboard");
+    }
+  }, [user, isInitialized, navigate]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8 bg-gradient-to-br from-hatch-blue/90 via-white to-hatch-coral/90 relative overflow-hidden">
@@ -61,48 +74,54 @@ const Auth = () => {
           </motion.p>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-          className="relative z-10"
-        >
-          <Card className="w-full border border-white/70 bg-white/70 backdrop-blur-xl shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
-            <Tabs
-              defaultValue="login"
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <div className="px-6 pt-6">
-                <TabsList className="grid grid-cols-2 w-full">
-                  <TabsTrigger 
-                    value="signup"
-                    className={`${activeTab === "signup" ? "bg-gradient-to-r from-hatch-coral to-hatch-coral" : "bg-transparent"} data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=active]:from-hatch-coral data-[state=active]:to-hatch-coral data-[state=active]:text-white font-medium`}
-                  >
-                    Sign Up
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="login"
-                    className={`${activeTab === "login" ? "bg-gradient-to-r from-hatch-blue to-hatch-blue" : "bg-transparent"} data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=active]:from-hatch-blue data-[state=active]:to-hatch-blue data-[state=active]:text-white font-medium`}
-                  >
-                    Log In
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+        {isInitialized && !user ? (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+            className="relative z-10"
+          >
+            <Card className="w-full border border-white/70 bg-white/70 backdrop-blur-xl shadow-xl rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
+              <Tabs
+                defaultValue="login"
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <div className="px-6 pt-6">
+                  <TabsList className="grid grid-cols-2 w-full">
+                    <TabsTrigger 
+                      value="signup"
+                      className={`${activeTab === "signup" ? "bg-gradient-to-r from-hatch-coral to-hatch-coral" : "bg-transparent"} data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=active]:from-hatch-coral data-[state=active]:to-hatch-coral data-[state=active]:text-white font-medium`}
+                    >
+                      Sign Up
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="login"
+                      className={`${activeTab === "login" ? "bg-gradient-to-r from-hatch-blue to-hatch-blue" : "bg-transparent"} data-[state=inactive]:bg-transparent data-[state=inactive]:text-gray-600 data-[state=active]:from-hatch-blue data-[state=active]:to-hatch-blue data-[state=active]:text-white font-medium`}
+                    >
+                      Log In
+                    </TabsTrigger>
+                  </TabsList>
+                </div>
 
-              <CardContent className="p-6">
-                <TabsContent value="signup" className="mt-0 animate-in fade-in-50 zoom-in-95 duration-300">
-                  <SignUpForm />
-                </TabsContent>
+                <CardContent className="p-6">
+                  <TabsContent value="signup" className="mt-0 animate-in fade-in-50 zoom-in-95 duration-300">
+                    <SignUpForm />
+                  </TabsContent>
 
-                <TabsContent value="login" className="mt-0 animate-in fade-in-50 zoom-in-95 duration-300">
-                  <LoginForm />
-                </TabsContent>
-              </CardContent>
-            </Tabs>
-          </Card>
-        </motion.div>
+                  <TabsContent value="login" className="mt-0 animate-in fade-in-50 zoom-in-95 duration-300">
+                    <LoginForm />
+                  </TabsContent>
+                </CardContent>
+              </Tabs>
+            </Card>
+          </motion.div>
+        ) : !isInitialized ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-hatch-blue"></div>
+          </div>
+        ) : null}
 
         <motion.div
           initial={{ opacity: 0 }}

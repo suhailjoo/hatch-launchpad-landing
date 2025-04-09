@@ -1,1 +1,8 @@
+
 project_id = "jaoxflaynrxgfljlorew"
+
+[functions.signup]
+verify_jwt = false
+
+[functions.me]
+verify_jwt = true

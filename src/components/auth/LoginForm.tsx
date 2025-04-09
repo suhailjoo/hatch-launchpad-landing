@@ -1,14 +1,17 @@
 
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Mail, Lock, KeyRound } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAuthStore } from "@/store/authStore";
+import { toast } from "@/hooks/use-toast";
 
 const LoginFormSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -19,6 +22,10 @@ const LoginFormSchema = z.object({
 type LoginFormValues = z.infer<typeof LoginFormSchema>;
 
 const LoginForm = () => {
+  const { login, error, clearErrors, isLoading } = useAuthStore();
+  const navigate = useNavigate();
+  const [submitting, setSubmitting] = useState(false);
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(LoginFormSchema),
     defaultValues: {
@@ -28,8 +35,29 @@ const LoginForm = () => {
     },
   });
 
-  const onSubmit = (data: LoginFormValues) => {
-    console.log(data);
+  const onSubmit = async (data: LoginFormValues) => {
+    try {
+      setSubmitting(true);
+      clearErrors();
+      
+      await login(data.email, data.password);
+      
+      toast({
+        title: "Login successful",
+        description: "Welcome back to Hatch!",
+      });
+      
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Login error:", error);
+      toast({
+        title: "Login failed",
+        description: error instanceof Error ? error.message : "An error occurred during login",
+        variant: "destructive",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const formAnimation = {
@@ -71,6 +99,7 @@ const LoginForm = () => {
                       placeholder="Enter your email" 
                       {...field} 
                       className="border-gray-300 focus:border-hatch-blue focus:ring-hatch-blue/20 transition-all duration-300"
+                      disabled={submitting}
                     />
                   </FormControl>
                   <FormMessage className="text-hatch-coral" />
@@ -100,6 +129,7 @@ const LoginForm = () => {
                         placeholder="Enter your password" 
                         {...field} 
                         className="border-gray-300 focus:border-hatch-blue focus:ring-hatch-blue/20 transition-all duration-300 pr-10"
+                        disabled={submitting}
                       />
                       <KeyRound className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground/60" />
                     </div>
@@ -121,6 +151,7 @@ const LoginForm = () => {
                       checked={field.value}
                       onCheckedChange={field.onChange}
                       className="data-[state=checked]:bg-hatch-blue data-[state=checked]:border-hatch-blue"
+                      disabled={submitting}
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
@@ -137,8 +168,18 @@ const LoginForm = () => {
             <Button 
               type="submit" 
               className="w-full mt-2 bg-gradient-to-r from-hatch-blue to-hatch-coral hover:from-hatch-coral hover:to-hatch-blue text-white transition-all duration-500 group shadow-md hover:shadow-lg"
+              disabled={submitting}
             >
-              Log In <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
+              {submitting ? (
+                <>
+                  <span className="animate-pulse">Logging in...</span>
+                  <span className="ml-1 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
+                </>
+              ) : (
+                <>
+                  Log In <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
+                </>
+              )}
             </Button>
           </motion.div>
         </form>
