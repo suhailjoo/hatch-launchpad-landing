@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 
 const HeroSection = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -43,9 +44,11 @@ const HeroSection = () => {
               Find, screen, and hire the best talent with our intelligent platform that simplifies your entire recruitment process.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 animate-on-scroll opacity-0" style={{ animationDelay: "0.6s" }}>
-              <Button className="bg-hatch-coral hover:bg-hatch-coral/90 text-white px-8 py-6 text-lg transition-all duration-300 hover:scale-105">
-                Get Started Free
-              </Button>
+              <Link to="/auth">
+                <Button className="bg-hatch-coral hover:bg-hatch-coral/90 text-white px-8 py-6 text-lg transition-all duration-300 hover:scale-105">
+                  Get Started Free
+                </Button>
+              </Link>
               <Button variant="outline" className="border-hatch-blue text-hatch-blue hover:bg-hatch-blue/10 px-8 py-6 text-lg transition-all duration-300 hover:scale-105">
                 Book a Demo
               </Button>

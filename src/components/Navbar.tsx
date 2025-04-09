@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import Logo from "./Logo";
 import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -43,9 +44,11 @@ const Navbar = () => {
           <a href="#pricing" className="text-gray-800 hover:text-hatch-coral transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-hatch-coral after:transition-all after:duration-300">
             Pricing
           </a>
-          <Button className="bg-hatch-coral hover:bg-hatch-coral/90 text-white transition-transform duration-300 hover:scale-105">
-            Get Started
-          </Button>
+          <Link to="/auth">
+            <Button className="bg-hatch-coral hover:bg-hatch-coral/90 text-white transition-transform duration-300 hover:scale-105">
+              Get Started
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile Menu Button */}
@@ -89,9 +92,11 @@ const Navbar = () => {
         >
           Pricing
         </a>
-        <Button className="bg-hatch-coral hover:bg-hatch-coral/90 text-white w-full transition-all duration-300 hover:scale-105">
-          Get Started
-        </Button>
+        <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)}>
+          <Button className="bg-hatch-coral hover:bg-hatch-coral/90 text-white w-full transition-all duration-300 hover:scale-105">
+            Get Started
+          </Button>
+        </Link>
       </div>
     </nav>
   );
