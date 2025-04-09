@@ -39,9 +39,16 @@ serve(async (req: Request) => {
     // Create a Supabase client with the service role key
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    const azureOpenAIEndpoint = Deno.env.get('AZURE_OPENAI_ENDPOINT') || '';
+    const azureOpenAIKey = Deno.env.get('AZURE_OPENAI_API_KEY') || '';
+    const azureOpenAIDeploymentId = Deno.env.get('AZURE_OPENAI_DEPLOYMENT_ID') || '';
     
     if (!supabaseUrl || !supabaseServiceKey) {
       throw new Error('Missing Supabase URL or service role key');
+    }
+    
+    if (!azureOpenAIEndpoint || !azureOpenAIKey || !azureOpenAIDeploymentId) {
+      throw new Error('Missing Azure OpenAI configuration');
     }
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -62,43 +69,101 @@ serve(async (req: Request) => {
       throw new Error(`Failed to download PDF: ${pdfResponse.status} ${pdfResponse.statusText}`);
     }
     
-    // Extract text from PDF - in a real implementation, you would use a PDF library
-    // For this example, we'll mock the extraction
+    const pdfBlob = await pdfResponse.blob();
+    
+    // This would be a real PDF text extraction in production
+    // For simplicity, we'll use a mock extraction in this example
     console.log("Extracting text from PDF...");
-    const extractedText = "Mock extracted text from resume"; // Mock extraction
+    
+    // In a real implementation, you would extract the text from the PDF using a PDF parser
+    // For this example, we'll just use a placeholder
+    const extractedText = "Jane Doe\nEmail: jane.doe@example.com\nPhone: 555-123-4567\nLocation: San Francisco, CA\n\nExperience:\nSoftware Engineer at Tech Corp (2020-01 to 2023-03)\nSoftware Engineering Intern at Startup Inc (2019-05 to 2019-08)\n\nProjects: Personal Portfolio, Task Management App\n\nCertifications: AWS Certified Developer\n\nAwards: Dean's List 2018-2019\n\nInterests: Hiking, Photography\n\nLinks: https://github.com/janedoe, https://linkedin.com/in/janedoe";
     
     // 2. Call Azure OpenAI to parse the resume
-    // In this example, we'll use a mock parsed resume
-    console.log("Parsing resume with AI...");
+    console.log("Parsing resume with Azure OpenAI...");
     
-    // This would be where you call Azure OpenAI in a real implementation
-    const parsedResume: ParsedResume = {
-      name: "Jane Doe",
-      email: "jane.doe@example.com",
-      phone: "555-123-4567",
-      location: "San Francisco, CA",
-      experience: [
-        {
-          role: "Software Engineer",
-          company: "Tech Corp",
-          start_date: "2020-01",
-          end_date: "2023-03",
-          type: "full_time"
-        },
-        {
-          role: "Software Engineering Intern",
-          company: "Startup Inc",
-          start_date: "2019-05",
-          end_date: "2019-08",
-          type: "internship"
-        }
-      ],
-      urls: ["https://github.com/janedoe", "https://linkedin.com/in/janedoe"],
-      projects: ["Personal Portfolio", "Task Management App"],
-      certifications: ["AWS Certified Developer"],
-      awards: ["Dean's List 2018-2019"],
-      interests: ["Hiking", "Photography"]
-    };
+    // Construct the Azure OpenAI API URL
+    const azureOpenAIUrl = `${azureOpenAIEndpoint}/openai/deployments/${azureOpenAIDeploymentId}/chat/completions?api-version=2023-05-15`;
+    
+    // System message for parsing resumes
+    const systemMessage = `
+      You are an expert resume parser. Extract structured information from the resume text.
+      Format your response as a valid JSON object with these fields:
+      {
+        "name": string,
+        "email": string,
+        "phone": string (optional),
+        "location": string (optional),
+        "experience": [
+          {
+            "role": string,
+            "company": string,
+            "start_date": string (optional),
+            "end_date": string (optional),
+            "type": "full_time" | "internship"
+          }
+        ],
+        "urls": string[],
+        "projects": string[] (optional),
+        "certifications": string[] (optional),
+        "awards": string[] (optional),
+        "interests": string[] (optional)
+      }
+      
+      Only include fields if they are present in the resume. Include all relevant information.
+      For experience, determine if each position is full_time or internship based on the context.
+      The response must be valid JSON with no explanation or additional text.
+    `;
+    
+    // Call Azure OpenAI API
+    const openAIResponse = await fetch(azureOpenAIUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'api-key': azureOpenAIKey,
+      },
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: systemMessage },
+          { role: 'user', content: extractedText }
+        ],
+        temperature: 0.2, // Lower temperature for more deterministic outputs
+        max_tokens: 800,
+      }),
+    });
+    
+    if (!openAIResponse.ok) {
+      const errorText = await openAIResponse.text();
+      throw new Error(`Azure OpenAI API error: ${openAIResponse.status} ${errorText}`);
+    }
+    
+    const openAIData = await openAIResponse.json();
+    
+    if (!openAIData.choices || !openAIData.choices[0] || !openAIData.choices[0].message) {
+      throw new Error('Invalid response from Azure OpenAI');
+    }
+    
+    // Extract the parsed resume from the AI response
+    const aiResponseContent = openAIData.choices[0].message.content;
+    let parsedResume: ParsedResume;
+    
+    try {
+      // Extract JSON from the response if it's surrounded by backticks or other text
+      const jsonMatch = aiResponseContent.match(/```json\s*([\s\S]*?)\s*```/) || 
+                        aiResponseContent.match(/{[\s\S]*}/);
+      
+      const jsonContent = jsonMatch ? jsonMatch[0].replace(/```json|```/g, '') : aiResponseContent;
+      parsedResume = JSON.parse(jsonContent);
+      
+      // Validate required fields
+      if (!parsedResume.name || !parsedResume.email || !Array.isArray(parsedResume.experience)) {
+        throw new Error('Missing required fields in parsed resume');
+      }
+    } catch (parseError) {
+      console.error('Failed to parse JSON from Azure OpenAI response:', parseError);
+      console.log('Raw response:', aiResponseContent);
+      throw new Error('Failed to parse resume data from AI response');
+    }
     
     // 3. Store the result in the ai_results table
     console.log("Storing parsed resume result...");

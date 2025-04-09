@@ -12,3 +12,6 @@ verify_jwt = true
 
 [functions.jobs-list]
 verify_jwt = true
+
+[functions.parse-resume]
+verify_jwt = true
