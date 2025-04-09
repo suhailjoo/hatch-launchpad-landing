@@ -15,17 +15,18 @@ import {
   SidebarGroupLabel,
   SidebarFooter,
   SidebarTrigger,
-  useSidebar
+  useSidebar,
+  SidebarRail
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, Briefcase, Users, Settings, LogOut, ChevronRight, ChevronLeft } from "lucide-react";
+import { LayoutDashboard, Briefcase, Users, Settings, LogOut, ChevronRight, ChevronLeft, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import Logo from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 
 const AuthLayout = () => {
   const { user, isInitialized } = useAuthStore();
   const navigate = useNavigate();
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const { pathname } = useLocation();
+  const { state } = useSidebar();
 
   useEffect(() => {
     // Redirect to login if user is not authenticated and initialization is complete
@@ -49,13 +50,13 @@ const AuthLayout = () => {
   }
 
   return (
-    <SidebarProvider defaultOpen={!sidebarCollapsed}>
+    <SidebarProvider>
       <div className="flex min-h-screen w-full bg-gradient-to-br from-gray-50 to-hatch-lightBlue/10">
-        <AppSidebar 
-          sidebarCollapsed={sidebarCollapsed}
-          setSidebarCollapsed={setSidebarCollapsed}
-          currentPath={pathname}
-        />
+        <AppSidebar currentPath={pathname} />
+        
+        {/* Adding SidebarRail for better control of collapsed sidebar */}
+        <SidebarRail className="z-30" />
+        
         <main className="flex-1 p-8 overflow-auto animate-fade-in">
           <div className="max-w-7xl mx-auto">
             <Outlet />
@@ -68,17 +69,13 @@ const AuthLayout = () => {
 
 // Separate sidebar component for better organization
 const AppSidebar = ({ 
-  sidebarCollapsed, 
-  setSidebarCollapsed,
   currentPath
 }: { 
-  sidebarCollapsed: boolean; 
-  setSidebarCollapsed: (collapsed: boolean) => void;
   currentPath: string;
 }) => {
   const navigate = useNavigate();
   const { logout } = useAuthStore();
-  const { state } = useSidebar(); // Get the state from useSidebar
+  const { state, toggleSidebar } = useSidebar(); // Get the state from useSidebar
   
   const handleLogout = async () => {
     await logout();
@@ -95,11 +92,13 @@ const AppSidebar = ({
         <div className="flex items-center">
           <Logo variant={state === "collapsed" ? "short" : "long"} className="text-2xl" />
         </div>
+        
+        {/* Moving the collapse button to the right side */}
         <SidebarTrigger 
-          onClick={() => setSidebarCollapsed(state === "expanded")}
+          onClick={toggleSidebar}
           className="p-1.5 rounded-md hover:bg-hatch-blue/10 text-hatch-blue transition-colors"
         >
-          {state === "collapsed" ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          {state === "collapsed" ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
         </SidebarTrigger>
       </SidebarHeader>
       
