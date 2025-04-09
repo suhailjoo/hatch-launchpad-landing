@@ -30,6 +30,7 @@ interface AuthState {
   logout: () => Promise<void>;
   setSessionFromStorage: () => Promise<void>;
   clearErrors: () => void;
+  refreshSession: () => Promise<void>; // Add the missing refreshSession method
 }
 
 const SUPABASE_URL = "https://jaoxflaynrxgfljlorew.supabase.co";
