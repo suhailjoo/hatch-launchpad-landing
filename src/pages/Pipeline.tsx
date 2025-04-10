@@ -1,9 +1,34 @@
 
-import { BadgeCheck, Plus, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import CandidateUploadDialog from "@/components/candidates/CandidateUploadDialog";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import CandidateCard from "@/components/candidates/CandidateCard";
+
+// Define our pipeline stages
+const PIPELINE_STAGES = [
+  "Applied", 
+  "Screening", 
+  "Interview", 
+  "Offer", 
+  "Hired", 
+  "Rejected"
+];
+
+// Sample candidate data for UI mockup
+const SAMPLE_CANDIDATES = [
+  { id: 1, name: "John Doe", resumeFile: "JohnDoe_Resume.pdf", status: "Applied" },
+  { id: 2, name: "Jane Smith", resumeFile: "JaneSmith_CV.pdf", status: "Applied" },
+  { id: 3, name: "Alex Johnson", resumeFile: "AlexJ_Resume.docx", status: "Screening" },
+  { id: 4, name: "Morgan Lee", resumeFile: "Morgan_Lee_Resume.pdf", status: "Screening" },
+  { id: 5, name: "Taylor Wilson", resumeFile: "Taylor_CV.pdf", status: "Interview" },
+  { id: 6, name: "Casey Brown", resumeFile: "CaseyBrown_Resume.pdf", status: "Offer" },
+  { id: 7, name: "Riley Garcia", resumeFile: "Riley_G_CV.pdf", status: "Hired" },
+  { id: 8, name: "Jordan Miller", resumeFile: "JordanMiller_Resume.pdf", status: "Rejected" },
+];
 
 const Pipeline = () => {
   // Extract job ID from URL parameters
@@ -49,63 +74,88 @@ const Pipeline = () => {
           <CandidateUploadDialog 
             jobId={jobId}
             trigger={
-              <button 
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-hatch-coral to-hatch-blue text-white rounded-lg shadow-md hover:shadow-lg transition-all"
+              <Button 
+                className="flex items-center gap-2 bg-gradient-to-r from-hatch-coral to-hatch-blue text-white hover:shadow-lg transition-all"
                 disabled={!jobId}
               >
                 <Plus size={18} />
                 <span>Add Candidate</span>
-              </button>
+              </Button>
             }
           />
         </div>
       </div>
       
-      <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-        {!jobId && (
+      {!jobId && (
+        <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
           <div className="text-center p-8 bg-gray-50 rounded-lg border border-gray-100">
             <p className="text-lg text-gray-600">Please select a job to view its candidate pipeline</p>
             <p className="text-sm text-gray-400 mt-2">
               Go to the <a href="/jobs" className="text-hatch-blue hover:underline">Jobs page</a> to select a job
             </p>
           </div>
-        )}
-        
-        {jobId && (
-          <>
-            <div className="flex items-center justify-between mb-6">
-              <p className="text-muted-foreground">Manage your candidate pipeline here.</p>
-              
-              <div className="flex items-center gap-2">
-                <select className="px-3 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-sm">
-                  <option>All Stages</option>
-                  <option>Applied</option>
-                  <option>Screening</option>
-                  <option>Interview</option>
-                  <option>Offer</option>
-                </select>
-              </div>
-            </div>
+        </div>
+      )}
+      
+      {jobId && (
+        <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+          <div className="flex items-center justify-between mb-6">
+            <p className="text-muted-foreground">Drag candidates between stages to update their status</p>
             
-            <div className="grid grid-cols-1 gap-4 mt-6">
-              {[1, 2, 3].map((item) => (
-                <div key={item} className="p-5 border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-white to-gray-50 flex items-center gap-4 group hover:border-hatch-blue/20">
-                  <div className="h-12 w-12 rounded-full bg-hatch-gold/10 flex items-center justify-center">
-                    <BadgeCheck className="text-hatch-gold" size={22} />
+            <div className="flex items-center gap-2">
+              <select className="px-3 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-sm">
+                <option>All Stages</option>
+                {PIPELINE_STAGES.map((stage) => (
+                  <option key={stage}>{stage}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          
+          {/* Kanban Board */}
+          <div className="w-full overflow-x-auto pb-6">
+            <div className="grid grid-cols-6 gap-4 min-w-[1000px]">
+              {PIPELINE_STAGES.map((stage) => (
+                <div key={stage} className="flex flex-col">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-gray-700">{stage}</h3>
+                    <div className="bg-gray-100 text-gray-700 text-xs font-medium rounded-full px-2 py-1">
+                      {SAMPLE_CANDIDATES.filter(c => c.status === stage).length}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className="font-medium group-hover:text-hatch-coral transition-colors">Alex Johnson</h3>
-                    <p className="text-sm text-gray-500">Applied for Senior Developer • 3 days ago</p>
-                  </div>
-                  <div className="px-3 py-1 bg-hatch-blue/10 text-hatch-blue text-sm font-medium rounded-full">
-                    Screening
-                  </div>
+                  
+                  <ScrollArea className="h-[calc(100vh-320px)]">
+                    <div className="pr-3">
+                      {stage === "Applied" && (
+                        <Button 
+                          variant="outline" 
+                          className="w-full mb-3 border-dashed border-gray-300 text-gray-500 hover:text-hatch-blue hover:border-hatch-blue/30"
+                          disabled={!jobId}
+                        >
+                          <Plus size={16} className="mr-1" />
+                          Add Candidate
+                        </Button>
+                      )}
+                      
+                      {SAMPLE_CANDIDATES
+                        .filter(candidate => candidate.status === stage)
+                        .map(candidate => (
+                          <CandidateCard
+                            key={candidate.id}
+                            name={candidate.name}
+                            resumeFile={candidate.resumeFile}
+                            status={candidate.status}
+                          />
+                        ))
+                      }
+                    </div>
+                  </ScrollArea>
                 </div>
               ))}
             </div>
-          </>
-        )}
-      </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
