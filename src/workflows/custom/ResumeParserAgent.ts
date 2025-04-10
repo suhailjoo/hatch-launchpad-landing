@@ -10,14 +10,14 @@ export interface ResumeParserInput {
 }
 
 /**
- * ResumeParserAgent: Downloads and parses PDF resumes using Azure OpenAI
+ * ResumeParserAgent: Extracts text from PDF resumes and uses AI to structure the information
  */
 export class ResumeParserAgent extends BaseAgent {
   constructor() {
     super({
       name: "Resume Parser",
-      description: "Extracts structured information from resume PDFs using AI.",
-      goal: "Accurately extract candidate information from resumes and store it in a structured format."
+      description: "Extracts and structures information from resume PDFs.",
+      goal: "Extract text from resumes using a PDF parser and then structure it with AI."
     });
   }
   

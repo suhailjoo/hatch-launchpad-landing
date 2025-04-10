@@ -65,7 +65,7 @@ serve(async (req: Request) => {
     
     console.log(`Processing resume for candidate ${candidate_id} from ${resume_url}`);
     
-    // 1. Download the PDF
+    // STEP 1: Download the PDF
     console.log("Downloading PDF from:", resume_url);
     const pdfResponse = await fetch(resume_url);
     if (!pdfResponse.ok) {
@@ -76,13 +76,13 @@ serve(async (req: Request) => {
     const pdfSize = pdfArrayBuffer.byteLength;
     console.log(`PDF downloaded successfully. Size: ${pdfSize} bytes`);
     
-    // 2. Extract text from PDF using pdf.js
+    // STEP 2: Extract text from PDF using pdf.js
     console.log("Extracting text from PDF using pdf.js...");
     
-    // Initialize PDF.js
-    await pdfjs.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
-    
     try {
+      // Initialize PDF.js
+      await pdfjs.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
+      
       // Load the PDF document
       const loadingTask = pdfjs.getDocument({ data: pdfArrayBuffer });
       const pdfDocument = await loadingTask.promise;
@@ -100,17 +100,19 @@ serve(async (req: Request) => {
         extractedText += pageText + '\n';
       }
       
-      console.log("Extracted text sample:", extractedText.substring(0, 100) + "...");
+      console.log("Extracted text sample:", extractedText.substring(0, 200) + "...");
+      console.log("Total extracted text length:", extractedText.length);
       
-      // 3. Call Azure OpenAI to parse the resume
-      console.log(`Calling Azure OpenAI (${azureOpenAIDeploymentId}) to parse resume...`);
+      // STEP 3: Call Azure OpenAI to process and structure the extracted text
+      console.log(`Calling Azure OpenAI (${azureOpenAIDeploymentId}) to process extracted text...`);
       
       // Construct the Azure OpenAI API URL
       const azureOpenAIUrl = `${azureOpenAIEndpoint}/openai/deployments/${azureOpenAIDeploymentId}/chat/completions?api-version=2025-01-01-preview`;
       
       // System message for parsing resumes
       const systemMessage = `
-        You are an expert resume parser. Extract structured information from the resume text.
+        You are an expert resume analyzer. A PDF resume has been parsed into plain text, and your job is to structure this information.
+        
         Format your response as a valid JSON object with these fields:
         {
           "name": string,
@@ -152,7 +154,7 @@ serve(async (req: Request) => {
           ],
           temperature: 0.1, // Lower temperature for more deterministic outputs
           max_tokens: 1000,
-          model: "gpt-4o-mini", // Explicitly set the model
+          model: "gpt-4o-mini", // Use a smaller, faster model
         }),
       });
       
@@ -172,7 +174,7 @@ serve(async (req: Request) => {
       
       // Extract the parsed resume from the AI response
       const aiResponseContent = openAIData.choices[0].message.content;
-      console.log("AI response content:", aiResponseContent.substring(0, 100) + "...");
+      console.log("AI response content sample:", aiResponseContent.substring(0, 200) + "...");
       
       let parsedResume: ParsedResume;
       
@@ -197,7 +199,7 @@ serve(async (req: Request) => {
         throw new Error('Failed to parse resume data from AI response');
       }
       
-      // 4. Store the result in the ai_results table
+      // STEP 4: Store the result in the ai_results table
       console.log("Storing parsed resume result in ai_results table...");
       
       // Type assertion to work around the type issue
@@ -219,7 +221,7 @@ serve(async (req: Request) => {
       
       console.log("AI result stored with ID:", aiResultData.id);
       
-      // 5. Update the candidate record with the parsed email if it's empty
+      // STEP 5: Update the candidate record with the parsed email if it's empty
       console.log("Checking if candidate email needs to be updated...");
       const { data: candidate, error: fetchCandidateError } = await supabase
         .from('candidates')
@@ -249,7 +251,7 @@ serve(async (req: Request) => {
         console.log("Candidate already has an email, skipping update");
       }
       
-      // 6. Create additional workflow jobs
+      // STEP 6: Create additional workflow jobs
       console.log("Creating follow-up workflow jobs...");
       const followUpJobs = [
         "embed_resume",
