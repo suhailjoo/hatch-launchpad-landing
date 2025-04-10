@@ -21,13 +21,13 @@ serve(async (req: Request) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
     const azureOpenAIEndpoint = Deno.env.get('AZURE_OPENAI_ENDPOINT') || '';
     const azureOpenAIKey = Deno.env.get('AZURE_OPENAI_API_KEY') || '';
-    const azureEmbeddingDeploymentId = Deno.env.get('AZURE_EMBEDDING_DEPLOYMENT_ID') || 'text-embedding-3-large';
+    const azureEmbeddingDeploymentId = Deno.env.get('AZURE_EMBEDDING_DEPLOYMENT_ID') || '';
     
     if (!supabaseUrl || !supabaseServiceKey) {
       throw new Error('Missing Supabase URL or service role key');
     }
     
-    if (!azureOpenAIEndpoint || !azureOpenAIKey) {
+    if (!azureOpenAIEndpoint || !azureOpenAIKey || !azureEmbeddingDeploymentId) {
       throw new Error('Missing Azure OpenAI configuration');
     }
     
@@ -41,10 +41,11 @@ serve(async (req: Request) => {
       throw new Error('Missing required parameters: candidate_id or org_id');
     }
     
-    console.log(`Generating embedding for candidate ${candidate_id}`);
+    console.log(`Processing resume embedding for candidate ${candidate_id}`);
     
-    // 1. Fetch the parsed resume result from the ai_results table
-    const { data: parsedResumeResult, error: fetchError } = await supabase
+    // 1. Fetch the parsed resume from ai_results
+    console.log("Fetching parsed resume data from ai_results table...");
+    const { data: resumeData, error: resumeError } = await supabase
       .from('ai_results')
       .select('result')
       .eq('job_type', 'resume_parse')
@@ -53,68 +54,87 @@ serve(async (req: Request) => {
       .limit(1)
       .single();
     
-    if (fetchError) {
-      console.error("Error fetching parsed resume:", fetchError);
-      throw new Error(`Failed to fetch parsed resume: ${fetchError.message}`);
+    if (resumeError) {
+      console.error("Error fetching parsed resume:", resumeError);
+      throw new Error(`Failed to fetch parsed resume: ${resumeError.message}`);
     }
     
-    if (!parsedResumeResult || !parsedResumeResult.result) {
+    if (!resumeData || !resumeData.result) {
       throw new Error('No parsed resume found for this candidate');
     }
     
-    const parsedResume = parsedResumeResult.result;
-    console.log("Found parsed resume data");
+    const parsedResume = resumeData.result;
+    console.log("Retrieved parsed resume data");
     
-    // 2. Flatten the parsed resume into a single string
-    const experienceText = parsedResume.experience
-      ? parsedResume.experience.map(exp => 
-          `${exp.role} at ${exp.company} ${exp.start_date || ''} to ${exp.end_date || ''} (${exp.type})`
-        ).join('. ')
-      : '';
+    // 2. Flatten the parsed resume into a string
+    console.log("Flattening resume data into a string...");
+    let flattenedText = `Name: ${parsedResume.name || ''}\n`;
+    flattenedText += `Email: ${parsedResume.email || ''}\n`;
     
-    const projectsText = parsedResume.projects 
-      ? `Projects: ${parsedResume.projects.join(', ')}` 
-      : '';
+    if (parsedResume.phone) {
+      flattenedText += `Phone: ${parsedResume.phone}\n`;
+    }
     
-    const certificationsText = parsedResume.certifications 
-      ? `Certifications: ${parsedResume.certifications.join(', ')}` 
-      : '';
+    if (parsedResume.location) {
+      flattenedText += `Location: ${parsedResume.location}\n`;
+    }
     
-    const awardsText = parsedResume.awards 
-      ? `Awards: ${parsedResume.awards.join(', ')}` 
-      : '';
+    flattenedText += "\nExperience:\n";
+    if (Array.isArray(parsedResume.experience)) {
+      parsedResume.experience.forEach((exp) => {
+        flattenedText += `${exp.role} at ${exp.company}`;
+        if (exp.start_date || exp.end_date) {
+          flattenedText += ` (${exp.start_date || ''} to ${exp.end_date || 'present'})`;
+        }
+        flattenedText += ` - ${exp.type}\n`;
+      });
+    }
     
-    const interestsText = parsedResume.interests 
-      ? `Interests: ${parsedResume.interests.join(', ')}` 
-      : '';
+    if (Array.isArray(parsedResume.urls) && parsedResume.urls.length > 0) {
+      flattenedText += "\nURLs:\n";
+      parsedResume.urls.forEach((url) => {
+        flattenedText += `${url}\n`;
+      });
+    }
     
-    const urlsText = parsedResume.urls 
-      ? `URLs: ${parsedResume.urls.join(', ')}` 
-      : '';
+    if (Array.isArray(parsedResume.projects) && parsedResume.projects.length > 0) {
+      flattenedText += "\nProjects:\n";
+      parsedResume.projects.forEach((project) => {
+        flattenedText += `${project}\n`;
+      });
+    }
     
-    // Combine all text fields into a single string
-    const flattenedText = [
-      `Name: ${parsedResume.name || ''}`,
-      `Email: ${parsedResume.email || ''}`,
-      `Phone: ${parsedResume.phone || ''}`,
-      `Location: ${parsedResume.location || ''}`,
-      `Experience: ${experienceText}`,
-      projectsText,
-      certificationsText,
-      awardsText,
-      interestsText,
-      urlsText
-    ].filter(text => text.length > 0).join('. ');
+    if (Array.isArray(parsedResume.certifications) && parsedResume.certifications.length > 0) {
+      flattenedText += "\nCertifications:\n";
+      parsedResume.certifications.forEach((cert) => {
+        flattenedText += `${cert}\n`;
+      });
+    }
     
-    console.log("Flattened resume text (sample):", flattenedText.substring(0, 100) + "...");
+    if (Array.isArray(parsedResume.awards) && parsedResume.awards.length > 0) {
+      flattenedText += "\nAwards:\n";
+      parsedResume.awards.forEach((award) => {
+        flattenedText += `${award}\n`;
+      });
+    }
     
-    // 3. Generate embedding using Azure OpenAI
-    console.log(`Calling Azure OpenAI embedding model: ${azureEmbeddingDeploymentId}`);
+    if (Array.isArray(parsedResume.interests) && parsedResume.interests.length > 0) {
+      flattenedText += "\nInterests:\n";
+      parsedResume.interests.forEach((interest) => {
+        flattenedText += `${interest}\n`;
+      });
+    }
+    
+    console.log("Resume flattened to text:", flattenedText.substring(0, 100) + "...");
+    
+    // 3. Call Azure OpenAI to generate embedding
+    console.log(`Calling Azure OpenAI (${azureEmbeddingDeploymentId}) to generate embedding...`);
     
     // Construct the Azure OpenAI API URL for embeddings
     const azureOpenAIUrl = `${azureOpenAIEndpoint}/openai/deployments/${azureEmbeddingDeploymentId}/embeddings?api-version=2023-05-15`;
     
-    const embeddingResponse = await fetch(azureOpenAIUrl, {
+    // Call Azure OpenAI API to generate embedding
+    const openAIResponse = await fetch(azureOpenAIUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -122,81 +142,51 @@ serve(async (req: Request) => {
       },
       body: JSON.stringify({
         input: flattenedText,
-        model: "text-embedding-3-large"
+        model: "text-embedding-3-large", // Explicitly set the model
       }),
     });
     
-    if (!embeddingResponse.ok) {
-      const errorText = await embeddingResponse.text();
-      console.error("Azure OpenAI Embedding API Error:", errorText);
-      throw new Error(`Azure OpenAI Embedding API error: ${embeddingResponse.status} ${errorText}`);
+    if (!openAIResponse.ok) {
+      const errorText = await openAIResponse.text();
+      console.error("Azure OpenAI API Error:", errorText);
+      throw new Error(`Azure OpenAI API error: ${openAIResponse.status} ${errorText}`);
     }
     
-    const embeddingData = await embeddingResponse.json();
-    console.log("Embedding generated successfully");
+    const openAIData = await openAIResponse.json();
+    console.log("Azure OpenAI embedding response received");
     
-    if (!embeddingData.data || !embeddingData.data[0] || !embeddingData.data[0].embedding) {
-      console.error("Invalid embedding response:", JSON.stringify(embeddingData));
-      throw new Error('Invalid response from Azure OpenAI Embedding API');
+    if (!openAIData.data || !openAIData.data[0] || !openAIData.data[0].embedding) {
+      console.error("Invalid Azure OpenAI response:", JSON.stringify(openAIData));
+      throw new Error('Invalid response from Azure OpenAI');
     }
     
-    const embeddingVector = embeddingData.data[0].embedding;
+    // Extract the embedding vector
+    const embeddingVector = openAIData.data[0].embedding;
+    console.log(`Successfully generated embedding vector with ${embeddingVector.length} dimensions`);
     
     // 4. Store the embedding vector in the candidates table
-    const { error: updateError } = await supabase
+    console.log("Storing embedding vector in candidates table...");
+    
+    const { error: updateCandidateError } = await supabase
       .from('candidates')
-      .update({
-        embedding_vector: embeddingVector
+      .update({ 
+        embedding_vector: embeddingVector,
+        updated_at: new Date().toISOString()
       })
       .eq('id', candidate_id);
     
-    if (updateError) {
-      console.error("Error updating candidate with embedding:", updateError);
-      throw new Error(`Failed to update candidate with embedding: ${updateError.message}`);
+    if (updateCandidateError) {
+      console.error("Error updating candidate with embedding vector:", updateCandidateError);
+      throw new Error(`Failed to update candidate with embedding vector: ${updateCandidateError.message}`);
     }
     
-    console.log("Embedding vector successfully stored for candidate:", candidate_id);
-    
-    // 5. Store a record in ai_results table
-    const { data: aiResultData, error: aiResultError } = await supabase
-      .from('ai_results')
-      .insert({
-        job_type: "embed_resume",
-        candidate_id,
-        org_id,
-        result: {
-          status: "success",
-          embedding_dimensions: embeddingVector.length,
-          embedding_model: azureEmbeddingDeploymentId
-        }
-      })
-      .select('id')
-      .single();
-    
-    if (aiResultError) {
-      console.error("Error storing AI result:", aiResultError);
-      throw new Error(`Failed to store AI result: ${aiResultError.message}`);
-    }
-    
-    console.log("AI result stored with ID:", aiResultData.id);
-    
-    // Update the workflow job status
-    const { error: workflowUpdateError } = await supabase
-      .from('workflow_jobs')
-      .update({ status: "completed" })
-      .eq('job_type', 'embed_resume')
-      .eq('candidate_id', candidate_id);
-    
-    if (workflowUpdateError) {
-      console.error("Error updating workflow job status:", workflowUpdateError);
-      // Non-critical error, continue
-    }
+    console.log("Embedding vector stored successfully");
     
     // Return success response
     return new Response(
       JSON.stringify({
         success: true,
-        message: "Resume embedding created and stored successfully",
+        message: "Resume embedding created successfully",
         dimensions: embeddingVector.length
       }),
       {
@@ -206,41 +196,7 @@ serve(async (req: Request) => {
     );
     
   } catch (error) {
-    console.error("Error generating embedding:", error);
-    
-    // If this is a known error (e.g. no parsed resume), write it to ai_results
-    try {
-      const { candidate_id, org_id } = await req.json();
-      
-      if (candidate_id && org_id) {
-        const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
-        const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-        
-        if (supabaseUrl && supabaseServiceKey) {
-          const supabase = createClient(supabaseUrl, supabaseServiceKey);
-          
-          await supabase
-            .from('ai_results')
-            .insert({
-              job_type: "embed_resume",
-              candidate_id,
-              org_id,
-              result: {
-                status: "error",
-                error: error instanceof Error ? error.message : String(error)
-              }
-            });
-          
-          await supabase
-            .from('workflow_jobs')
-            .update({ status: "failed" })
-            .eq('job_type', 'embed_resume')
-            .eq('candidate_id', candidate_id);
-        }
-      }
-    } catch (logError) {
-      console.error("Error logging to ai_results:", logError);
-    }
+    console.error("Error processing resume embedding:", error);
     
     return new Response(
       JSON.stringify({
