@@ -1,3 +1,4 @@
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,14 +20,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
 import { UploadCloud } from "lucide-react";
-import { useState } from "react";
-import { useUser } from "@clerk/clerk-react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { v4 as uuidv4 } from 'uuid';
-import { RecruitingWorkflow } from "@/workflows/crewai/RecruitingWorkflow";
+import { RecruitingWorkflow } from "@/workflows/custom/RecruitingWorkflow";
 
 interface CandidateUploadDialogProps {
   jobId?: string;
@@ -38,9 +39,19 @@ const CandidateUploadDialog: React.FC<CandidateUploadDialogProps> = ({ jobId, tr
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [candidateEmail, setCandidateEmail] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-  const { user } = useUser();
+  const [orgId, setOrgId] = useState<string | null>(null);
   
-  const orgId = user?.publicMetadata.orgId as string;
+  // Fetch organization ID from user metadata when component mounts
+  useEffect(() => {
+    const fetchOrgId = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (user && user.user_metadata && user.user_metadata.orgId) {
+        setOrgId(user.user_metadata.orgId as string);
+      }
+    };
+    
+    fetchOrgId();
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -84,7 +95,7 @@ const CandidateUploadDialog: React.FC<CandidateUploadDialogProps> = ({ jobId, tr
         return;
       }
 
-      const resumeUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${uploadData.Key}`;
+      const resumeUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/resumes/${filePath}`;
 
       // Create candidate record in database
       const candidateData = {
@@ -110,7 +121,7 @@ const CandidateUploadDialog: React.FC<CandidateUploadDialogProps> = ({ jobId, tr
         return;
       }
       
-      // Process the candidate using CrewAI workflow
+      // Process the candidate using our custom workflow
       await RecruitingWorkflow.processCandidate({
         resume_url: resumeUrl,
         candidate_id: insertData.id,
