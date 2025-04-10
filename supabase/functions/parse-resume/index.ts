@@ -80,8 +80,8 @@ serve(async (req: Request) => {
     console.log("Extracting text from PDF using pdf.js...");
     
     try {
-      // Initialize PDF.js
-      await pdfjs.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
+      // Initialize PDF.js - FIX: Proper assignment without await
+      pdfjs.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
       
       // Load the PDF document
       const loadingTask = pdfjs.getDocument({ data: pdfArrayBuffer });
