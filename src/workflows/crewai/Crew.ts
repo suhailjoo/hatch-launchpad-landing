@@ -1,77 +1,41 @@
 
-import { Crew as CrewAICrew, Process, Task } from 'crewai';
-import { BaseAgent } from './BaseAgent';
+import { Crew as CrewAICrew, Agent, Task } from 'crewai';
 
 /**
- * Crew: Orchestrates multiple agents to work together on complex tasks
+ * Configuration for creating a Crew
+ */
+export interface CrewConfig {
+  name: string;
+  description: string;
+  agents: Agent[];
+  tasks: Task[];
+}
+
+/**
+ * Crew: A wrapper around CrewAI's Crew class
  */
 export class Crew {
-  private name: string;
-  private description: string;
-  private agents: BaseAgent[];
-  private tasks: Task[];
-  private verbose: boolean;
+  private config: CrewConfig;
+  private crew: CrewAICrew;
   
-  constructor({
-    name,
-    description,
-    agents = [],
-    tasks = [],
-    verbose = true
-  }: {
-    name: string;
-    description: string;
-    agents?: BaseAgent[];
-    tasks?: Task[];
-    verbose?: boolean;
-  }) {
-    this.name = name;
-    this.description = description;
-    this.agents = agents;
-    this.tasks = tasks;
-    this.verbose = verbose;
+  constructor(config: CrewConfig) {
+    this.config = config;
+    this.crew = new CrewAICrew({
+      agents: config.agents,
+      tasks: config.tasks,
+      verbose: true
+    });
   }
   
   /**
-   * Add an agent to the crew
+   * Executes the crew's tasks
    */
-  public addAgent(agent: BaseAgent): void {
-    this.agents.push(agent);
-  }
-  
-  /**
-   * Add a task to the crew
-   */
-  public addTask(task: Task): void {
-    this.tasks.push(task);
-  }
-  
-  /**
-   * Execute all tasks with the crew of agents
-   */
-  public async execute(): Promise<any> {
+  public async execute(): Promise<void> {
     try {
-      console.log(`Executing crew "${this.name}" with ${this.agents.length} agents and ${this.tasks.length} tasks`);
-      
-      // Convert BaseAgent instances to CrewAI Agent instances
-      const crewAgents = this.agents.map(agent => agent.createCrewAgent());
-      
-      // Create the CrewAI crew
-      const crew = new CrewAICrew({
-        agents: crewAgents,
-        tasks: this.tasks,
-        verbose: this.verbose,
-        process: Process.Sequential
-      });
-      
-      // Execute the crew
-      const result = await crew.kickoff();
-      
-      console.log(`Crew "${this.name}" execution completed`);
-      return result;
-      
+      console.log(`Executing crew: ${this.config.name}`);
+      await this.crew.run();
     } catch (error) {
-      console.error(`Error executing crew "${this.name}":`, error);
+      console.error(`Error executing crew: ${error}`);
       throw error;
     }
   }

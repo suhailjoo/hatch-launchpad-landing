@@ -1,82 +1,49 @@
 
-import { Agent as CrewAgent, Tool } from 'crewai';
-import { supabase } from "@/integrations/supabase/client";
+import { Agent, AgentOptions } from 'crewai';
 import { toast } from "@/components/ui/use-toast";
 
 /**
- * BaseAgent: Abstract base class for all CrewAI agents in the application
+ * BaseAgent: Foundation class for all CrewAI agents
  */
-export abstract class BaseAgent {
-  protected name: string;
-  protected description: string;
-  protected goal: string;
-  protected tools: Tool[];
+export interface BaseAgentConfig {
+  name: string;
+  description: string;
+  goal: string;
+  tools?: any[];
+}
+
+export class BaseAgent {
+  private config: BaseAgentConfig;
   
-  constructor({
-    name,
-    description,
-    goal,
-    tools = []
-  }: {
-    name: string;
-    description: string;
-    goal: string;
-    tools?: Tool[];
-  }) {
-    this.name = name;
-    this.description = description;
-    this.goal = goal;
-    this.tools = tools;
+  constructor(config: BaseAgentConfig) {
+    this.config = config;
   }
   
   /**
-   * Creates a CrewAI agent instance with the configured properties
+   * Creates a CrewAI agent with the specified configuration
    */
-  public createCrewAgent(): CrewAgent {
-    return new CrewAgent({
-      name: this.name,
-      description: this.description,
-      goal: this.goal,
-      allowDelegation: false,
-      verbose: true,
-      tools: this.tools
+  public createCrewAgent(): Agent {
+    return new Agent({
+      name: this.config.name,
+      description: this.config.description,
+      goal: this.config.goal,
+      tools: this.config.tools || [],
+      verbose: true
     });
   }
   
   /**
    * Shows a toast notification
    */
-  protected showToast(title: string, description: string, variant: 'default' | 'destructive' = 'default') {
+  protected showToast(
+    title: string, 
+    description: string, 
+    variant: "default" | "destructive" = "default"
+  ): void {
     toast({
       title,
       description,
       variant
     });
   }
-  
-  /**
-   * Makes a Supabase function call
-   */
-  protected async callEdgeFunction(functionName: string, payload: any): Promise<any> {
-    try {
-      const { data, error } = await supabase.functions.invoke(functionName, {
-        body: payload
-      });
-      
-      if (error) {
-        console.error(`Error calling ${functionName}:`, error);
-        throw error;
-      }
-      
-      return data;
-    } catch (error) {
-      console.error(`Exception in ${functionName}:`, error);
-      throw error;
-    }
-  }
-  
-  /**
-   * Abstract method that all agents must implement
-   */
-  public abstract execute(input: any): Promise<any>;
 }
