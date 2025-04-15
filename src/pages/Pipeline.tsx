@@ -1,14 +1,13 @@
-
 import { Plus, Search } from "lucide-react";
 import CandidateUploadDialog from "@/components/candidates/CandidateUploadDialog";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import CandidateCard from "@/components/candidates/CandidateCard";
+import { useQuery } from "@tanstack/react-query";
 
-// Define our pipeline stages
 const PIPELINE_STAGES = [
   "Applied", 
   "Screening", 
@@ -18,25 +17,29 @@ const PIPELINE_STAGES = [
   "Rejected"
 ];
 
-// Sample candidate data for UI mockup
-const SAMPLE_CANDIDATES = [
-  { id: 1, name: "John Doe", resumeFile: "JohnDoe_Resume.pdf", status: "Applied" },
-  { id: 2, name: "Jane Smith", resumeFile: "JaneSmith_CV.pdf", status: "Applied" },
-  { id: 3, name: "Alex Johnson", resumeFile: "AlexJ_Resume.docx", status: "Screening" },
-  { id: 4, name: "Morgan Lee", resumeFile: "Morgan_Lee_Resume.pdf", status: "Screening" },
-  { id: 5, name: "Taylor Wilson", resumeFile: "Taylor_CV.pdf", status: "Interview" },
-  { id: 6, name: "Casey Brown", resumeFile: "CaseyBrown_Resume.pdf", status: "Offer" },
-  { id: 7, name: "Riley Garcia", resumeFile: "Riley_G_CV.pdf", status: "Hired" },
-  { id: 8, name: "Jordan Miller", resumeFile: "JordanMiller_Resume.pdf", status: "Rejected" },
-];
-
 const Pipeline = () => {
-  // Extract job ID from URL parameters
   const { jobId } = useParams<{ jobId?: string }>();
   const [jobTitle, setJobTitle] = useState<string>("");
   
+  const { data: candidatesData, isLoading } = useQuery({
+    queryKey: ['candidates', jobId],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('candidates-by-job', {
+        body: { job_id: jobId }
+      });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!jobId
+  });
+
+  const candidatesByStage = PIPELINE_STAGES.reduce((acc, stage) => {
+    acc[stage] = candidatesData?.candidates.filter(c => c.status === stage.toLowerCase()) || [];
+    return acc;
+  }, {} as Record<string, any[]>);
+
   useEffect(() => {
-    // If we have a job ID, fetch the job title
     if (jobId) {
       const fetchJobTitle = async () => {
         const { data, error } = await supabase
@@ -112,48 +115,56 @@ const Pipeline = () => {
             </div>
           </div>
           
-          {/* Kanban Board */}
-          <div className="w-full overflow-x-auto pb-6">
-            <div className="grid grid-cols-6 gap-4 min-w-[1000px]">
-              {PIPELINE_STAGES.map((stage) => (
-                <div key={stage} className="flex flex-col">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-gray-700">{stage}</h3>
-                    <div className="bg-gray-100 text-gray-700 text-xs font-medium rounded-full px-2 py-1">
-                      {SAMPLE_CANDIDATES.filter(c => c.status === stage).length}
-                    </div>
-                  </div>
-                  
-                  <ScrollArea className="h-[calc(100vh-320px)]">
-                    <div className="pr-3">
-                      {stage === "Applied" && (
-                        <Button 
-                          variant="outline" 
-                          className="w-full mb-3 border-dashed border-gray-300 text-gray-500 hover:text-hatch-blue hover:border-hatch-blue/30"
-                          disabled={!jobId}
-                        >
-                          <Plus size={16} className="mr-1" />
-                          Add Candidate
-                        </Button>
-                      )}
-                      
-                      {SAMPLE_CANDIDATES
-                        .filter(candidate => candidate.status === stage)
-                        .map(candidate => (
-                          <CandidateCard
-                            key={candidate.id}
-                            name={candidate.name}
-                            resumeFile={candidate.resumeFile}
-                            status={candidate.status}
-                          />
-                        ))
-                      }
-                    </div>
-                  </ScrollArea>
-                </div>
-              ))}
+          {isLoading ? (
+            <div className="text-center py-8 text-gray-500">
+              Loading candidates...
             </div>
-          </div>
+          ) : (
+            <div className="w-full overflow-x-auto pb-6">
+              <div className="grid grid-cols-6 gap-4 min-w-[1000px]">
+                {PIPELINE_STAGES.map((stage) => (
+                  <div key={stage} className="flex flex-col">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold text-gray-700">{stage}</h3>
+                      <div className="bg-gray-100 text-gray-700 text-xs font-medium rounded-full px-2 py-1">
+                        {candidatesByStage[stage]?.length || 0}
+                      </div>
+                    </div>
+                    
+                    <ScrollArea className="h-[calc(100vh-320px)]">
+                      <div className="pr-3">
+                        {stage === "Applied" && (
+                          <Button 
+                            variant="outline" 
+                            className="w-full mb-3 border-dashed border-gray-300 text-gray-500 hover:text-hatch-blue hover:border-hatch-blue/30"
+                            disabled={!jobId}
+                          >
+                            <Plus size={16} className="mr-1" />
+                            Add Candidate
+                          </Button>
+                        )}
+                        
+                        {candidatesByStage[stage]?.length === 0 ? (
+                          <div className="text-center py-4 text-gray-400 text-sm">
+                            No candidates in {stage.toLowerCase()}
+                          </div>
+                        ) : (
+                          candidatesByStage[stage]?.map(candidate => (
+                            <CandidateCard
+                              key={candidate.id}
+                              name={candidate.email}
+                              resumeFile={candidate.resume_url}
+                              status={candidate.status}
+                            />
+                          ))
+                        )}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
